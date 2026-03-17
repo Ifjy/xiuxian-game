@@ -1892,6 +1892,8 @@ class GameState {
         // 只在创建新角色时应用出身加成（不处理从存档加载的情况）
         if (!characterData || !characterData.playerName) {
             this.applyBackgroundBonus();
+            // 新角色自动学习第一个战斗技能
+            this.learnInitialCombatSkill();
         }
     }
 
@@ -1931,6 +1933,46 @@ class GameState {
         }
         if (bonus.defense) {
             // 暂时存储防御加成，战斗时应用
+        }
+    }
+
+    // 新角色学习初始战斗技能
+    learnInitialCombatSkill() {
+        // 自动学习剑气术（第一个技能，无要求）
+        const initialSkillId = 'sword_qi';
+        const result = this.learnCombatSkill(initialSkillId);
+        if (result.success) {
+            this.activeCombatSkill = initialSkillId;
+            console.log('自动学会初始战斗技能:', result.message);
+        }
+    }
+
+    // 检查并学习新的战斗技能
+    checkAndLearnCombatSkills() {
+        for (const [skillId, skill] of Object.entries(CONFIG.combatSkills)) {
+            // 跳过已学会的技能
+            if (this.combatSkills[skillId] && this.combatSkills[skillId].learned) {
+                continue;
+            }
+
+            // 检查是否满足技能要求
+            if (skill.requirements.realm) {
+                const realmNames = Object.keys(CONFIG.realms);
+                const currentRealmIndex = realmNames.indexOf(this.realm);
+                const requiredRealmIndex = realmNames.indexOf(skill.requirements.realm);
+
+                if (currentRealmIndex >= requiredRealmIndex) {
+                    if (currentRealmIndex === requiredRealmIndex && this.level < skill.requirements.level) {
+                        continue; // 同境界但层级不够
+                    }
+
+                    // 满足条件，自动学习
+                    const result = this.learnCombatSkill(skillId);
+                    if (result.success) {
+                        this.addLog(`突破境界，领悟了${skill.name}！`, 'rare');
+                    }
+                }
+            }
         }
     }
 
@@ -2234,6 +2276,9 @@ class GameState {
 
             this.cultivation = Math.floor(this.maxCultivation * 0.1);
             this.maxCultivation = this.calculateCultivationRequirement();
+
+            // 检查并学习新的战斗技能
+            this.checkAndLearnCombatSkills();
 
             return { success: true, message: '突破成功！' };
         } else {
@@ -2853,7 +2898,7 @@ class GameState {
     }
 
     // 战斗系统
-    fightMonster(monsterId) {
+    fightMonster(monsterId, skillId = null) {
         const monster = CONFIG.monsters.find(m => m.id === monsterId);
         if (!monster) {
             return { success: false, message: '怪物不存在' };
@@ -2874,10 +2919,33 @@ class GameState {
             }
         }
 
+        // 处理技能
+        let skillUsed = null;
+        let skillBonusText = '';
+
+        if (skillId && this.combatSkills[skillId] && this.combatSkills[skillId].learned) {
+            const canUse = this.canUseSkill(skillId);
+            if (canUse.can) {
+                skillUsed = CONFIG.combatSkills[skillId];
+
+                // 设置技能冷却
+                if (skillUsed.cooldown > 0) {
+                    this.combatSkillCooldowns[skillId] = Date.now() + (skillUsed.cooldown * 1000);
+                }
+
+                // 更新技能使用统计
+                this.combatSkills[skillId].timesUsed = (this.combatSkills[skillId].timesUsed || 0) + 1;
+
+                skillBonusText = `【使用${skillUsed.name}】`;
+            } else {
+                return { success: false, message: canUse.message };
+            }
+        }
+
         // 计算境界压制
         const suppression = this.calculateRealmSuppression(monster.requirements.realm, monster.requirements.level);
 
-        // 计算战斗属性
+        // 计算基础战斗属性
         const playerStats = this.calculateCombatStats();
 
         // 应用境界压制效果
@@ -2886,13 +2954,26 @@ class GameState {
 
         if (suppression.hasSuppression) {
             if (suppression.suppressionLevel === 'suppressed') {
-                // 玩家被压制，属性降低
                 finalPlayerAttack *= suppression.multiplier;
                 finalPlayerDefense *= suppression.multiplier;
             } else {
-                // 玩家压制怪物
                 finalPlayerAttack *= suppression.multiplier;
                 finalPlayerDefense *= suppression.multiplier;
+            }
+        }
+
+        // 应用技能效果
+        if (skillUsed) {
+            if (skillUsed.type === 'attack') {
+                // 攻击技能：增加伤害
+                finalPlayerAttack *= skillUsed.power;
+            } else if (skillUsed.type === 'defense') {
+                // 防御技能：减少受到的伤害
+                finalPlayerDefense *= skillUsed.power;
+            } else if (skillUsed.type === 'buff') {
+                // Buff技能：全面提升
+                finalPlayerAttack *= skillUsed.power;
+                finalPlayerDefense *= skillUsed.power;
             }
         }
 
@@ -2904,13 +2985,13 @@ class GameState {
         const playerRounds = Math.ceil(monster.hp / playerDamage);
         const monsterRounds = Math.ceil(playerStats.health / monsterDamage);
 
-        // 幸运影响（有概率额外减少受到的伤害）
+        // 幸运影响
         const luckReduction = playerStats.luckBonus > 0 ? Math.random() < playerStats.luckBonus : false;
         const actualMonsterRounds = luckReduction ? Math.max(1, monsterRounds - 1) : monsterRounds;
 
         const victory = playerRounds <= actualMonsterRounds;
 
-        // 构建压制信息
+        // 构建信息
         let suppressionInfo = '';
         if (suppression.hasSuppression) {
             if (suppression.suppressionLevel === 'suppressed') {
@@ -2938,14 +3019,29 @@ class GameState {
 
             // 受伤计算（即使胜利也会受伤）
             const damageTaken = monsterDamage * (playerRounds - 1);
-            const healthLoss = Math.min(playerStats.health * 0.3, damageTaken);
+
+            // 防御技能减少受到的伤害
+            let reducedDamage = damageTaken;
+            if (skillUsed && skillUsed.effect === 'damage_reduction') {
+                reducedDamage *= (1 - skillUsed.value);
+            }
+
+            const healthLoss = Math.min(playerStats.health * 0.3, reducedDamage);
             const cultivationLoss = Math.floor(healthLoss * 0.5);
 
             if (cultivationLoss > 0) {
                 this.cultivation = Math.max(0, this.cultivation - cultivationLoss);
             }
 
-            let message = `战胜了${monster.name}！${suppressionInfo}获得${spiritStones}灵石，${cultivation}修为`;
+            // 更新最高伤害记录
+            if (skillUsed) {
+                const totalDamage = playerDamage * playerRounds;
+                if (!this.combatSkills[skillId].highestDamage || totalDamage > this.combatSkills[skillId].highestDamage) {
+                    this.combatSkills[skillId].highestDamage = Math.floor(totalDamage);
+                }
+            }
+
+            let message = `战胜了${monster.name}！${skillBonusText}${suppressionInfo}获得${spiritStones}灵石，${cultivation}修为`;
             if (droppedItems.length > 0) {
                 message += `，获得${droppedItems.join('、')}`;
             }
@@ -2963,7 +3059,7 @@ class GameState {
             this.spiritStones = Math.max(0, this.spiritStones - spiritStonesLost);
             this.cultivation = Math.max(0, this.cultivation - cultivationLost);
 
-            const message = `被${monster.name}击败！损失${spiritStonesLost}灵石，${cultivationLost}修为`;
+            const message = `被${monster.name}击败！${skillBonusText}损失${spiritStonesLost}灵石，${cultivationLost}修为`;
             this.addLog(message, 'danger');
             return { success: false, victory: false, message };
         }
@@ -5151,6 +5247,7 @@ class GameUI {
         modalHeader.querySelector('pre').textContent = '┌─── 战 斗 场 ───┐';
 
         const playerStats = this.state.calculateCombatStats();
+        const availableSkills = this.state.getAvailableCombatSkills();
 
         let html = `
             <div class="player-stats">
@@ -5159,6 +5256,36 @@ class GameUI {
                 <div class="stat-row">防御: ${playerStats.defense}</div>
                 <div class="stat-row">生命: ${playerStats.health}</div>
                 <div class="stat-row">幸运加成: ${(playerStats.luckBonus * 100).toFixed(1)}%</div>
+            </div>
+
+            <div class="combat-skills-section">
+                <div class="skills-title">战斗技能</div>
+                <div class="skills-selection">
+        `;
+
+        if (availableSkills.length > 0) {
+            availableSkills.forEach(skill => {
+                const isOnCooldown = this.state.combatSkillCooldowns[skill.id] > Date.now();
+                const cooldownText = isOnCooldown
+                    ? `冷却中 (${Math.ceil((this.state.combatSkillCooldowns[skill.id] - Date.now()) / 1000)}秒)`
+                    : skill.description;
+                const cooldownClass = isOnCooldown ? 'skill-on-cooldown' : '';
+                const selectedClass = this.state.activeCombatSkill === skill.id ? 'skill-selected' : '';
+
+                html += `
+                    <div class="combat-skill-card ${cooldownClass} ${selectedClass}" data-skill="${skill.id}">
+                        <div class="skill-card-name">${skill.name} <span style="font-size: 10px; color: var(--rare-color);">[${skill.tier}]</span></div>
+                        <div class="skill-card-desc">${cooldownText}</div>
+                        <div class="skill-card-effect">威力: ${skill.power}x | 消耗: ${skill.cost}</div>
+                    </div>
+                `;
+            });
+        } else {
+            html += `<div class="empty-skills">暂无可用战斗技能<br><span style="font-size: 11px; color: var(--text-secondary);">提升境界可解锁更多技能</span></div>`;
+        }
+
+        html += `
+                </div>
             </div>
 
             <div class="monster-list">
@@ -5202,11 +5329,24 @@ class GameUI {
         html += '</div>';
         modalBody.innerHTML = html;
 
+        // 添加技能选择事件
+        modalBody.querySelectorAll('.combat-skill-card:not(.skill-on-cooldown)').forEach(skillCard => {
+            skillCard.addEventListener('click', () => {
+                // 移除其他技能的选中状态
+                modalBody.querySelectorAll('.combat-skill-card').forEach(card => {
+                    card.classList.remove('skill-selected');
+                });
+                // 选中当前技能
+                skillCard.classList.add('skill-selected');
+                this.state.activeCombatSkill = skillCard.getAttribute('data-skill');
+            });
+        });
+
         // 添加怪物点击事件
         modalBody.querySelectorAll('.monster-item').forEach(item => {
             item.addEventListener('click', () => {
                 const monsterId = item.getAttribute('data-monster');
-                const result = this.state.fightMonster(monsterId);
+                const result = this.state.fightMonster(monsterId, this.state.activeCombatSkill);
                 this.state.addLog(result.message, result.success ? (result.victory ? 'success' : 'info') : 'danger');
                 this.updateDisplay();
 
