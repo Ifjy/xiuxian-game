@@ -74,6 +74,7 @@ class CharacterCreation {
         this.remainingPoints = 20;
         this.background = 'commoner';
         this.selectedSlot = null;
+        this.spiritualRoot = null; // 灵根
         this.init();
     }
 
@@ -83,6 +84,10 @@ class CharacterCreation {
 
         // 绑定事件
         this.bindEvents();
+
+        // 生成初始灵根
+        this.generateSpiritualRoot();
+        this.updateSpiritualRootDisplay();
     }
 
     // 显示存档管理界面
@@ -279,6 +284,15 @@ class CharacterCreation {
         document.getElementById('backBtn').addEventListener('click', () => {
             this.showSaveManagement();
         });
+
+        // 重新抽取灵根按钮
+        const rerollBtn = document.getElementById('rerollRootBtn');
+        if (rerollBtn) {
+            rerollBtn.addEventListener('click', () => {
+                this.generateSpiritualRoot();
+                this.updateSpiritualRootDisplay();
+            });
+        }
     }
 
     addTalentPoint(attribute) {
@@ -347,6 +361,7 @@ class CharacterCreation {
             daoName: daoName,
             background: background,
             talents: { ...this.talents },
+            spiritualRoot: this.spiritualRoot, // 添加灵根
             saveSlot: this.selectedSlot
         };
 
@@ -373,6 +388,82 @@ class CharacterCreation {
         } else {
             const days = Math.floor(hours / 24);
             return `${days}天${hours % 24}小时`;
+        }
+    }
+
+    // 生成随机灵根
+    generateSpiritualRoot() {
+        const roots = Object.entries(CONFIG.spiritualRoots);
+        const roll = Math.random();
+        let cumulative = 0;
+
+        for (const [rootName, rootConfig] of roots) {
+            cumulative += rootConfig.chance;
+            if (roll <= cumulative) {
+                this.spiritualRoot = rootName;
+                return;
+            }
+        }
+
+        // 如果概率不匹配，返回默认杂灵根
+        this.spiritualRoot = '四系灵根';
+    }
+
+    // 更新灵根显示
+    updateSpiritualRootDisplay() {
+        const rootTitle = document.getElementById('spiritualRootTitle');
+        const rootDesc = document.getElementById('spiritualRootDesc');
+        const rootEffects = document.getElementById('spiritualRootEffects');
+        const effectList = document.getElementById('rootEffectList');
+
+        if (!rootTitle || !rootDesc || !rootEffects || !effectList) return;
+
+        const rootConfig = CONFIG.spiritualRoots[this.spiritualRoot];
+        if (!rootConfig) return;
+
+        // 更新标题和描述
+        rootTitle.textContent = this.spiritualRoot;
+        rootTitle.style.color = rootConfig.color;
+        rootDesc.textContent = rootConfig.description;
+
+        // 更新效果列表
+        effectList.innerHTML = '';
+
+        const effects = [];
+        if (rootConfig.cultivationBonus !== 1.0) {
+            const bonus = ((rootConfig.cultivationBonus - 1) * 100).toFixed(0);
+            effects.push(`修炼速度${bonus > 0 ? '+' : ''}${bonus}%`);
+        }
+        if (rootConfig.skillBonus !== 1.0) {
+            const bonus = ((rootConfig.skillBonus - 1) * 100).toFixed(0);
+            effects.push(`功法学习${bonus > 0 ? '+' : ''}${bonus}%`);
+        }
+        if (rootConfig.alchemyBonus !== 1.0) {
+            const bonus = ((rootConfig.alchemyBonus - 1) * 100).toFixed(0);
+            effects.push(`炼丹成功率${bonus > 0 ? '+' : ''}${bonus}%`);
+        }
+        if (rootConfig.healingBonus) {
+            const bonus = (rootConfig.healingBonus * 100).toFixed(0);
+            effects.push(`治疗效果+${bonus}%`);
+        }
+        if (rootConfig.attackBonus) {
+            const bonus = (rootConfig.attackBonus * 100).toFixed(0);
+            effects.push(`攻击力+${bonus}%`);
+        }
+        if (rootConfig.defenseBonus) {
+            const bonus = (rootConfig.defenseBonus * 100).toFixed(0);
+            effects.push(`防御力+${bonus}%`);
+        }
+
+        if (effects.length > 0) {
+            rootEffects.style.display = 'block';
+            effects.forEach(effect => {
+                const li = document.createElement('li');
+                li.textContent = effect;
+                effectList.appendChild(li);
+            });
+        } else {
+            rootEffects.style.display = 'none';
         }
     }
 

@@ -1,157 +1,5 @@
 // ==================== 游戏配置 ====================
 const CONFIG = {
-    // 灵根配置
-    spiritualRoots: {
-        // 天灵根（单元素，最强）
-        '天火灵根': {
-            tier: '天灵根',
-            element: '火',
-            cultivationBonus: 1.5,      // 修炼速度+50%
-            skillBonus: 1.3,            // 功法学习+30%
-            alchemyBonus: 1.2,          // 炼丹成功率+20%
-            combatBonus: { fire: 0.3 }, // 火系技能威力+30%
-            description: '天灵根之最，火焰之力，修炼如神助',
-            color: '#FF4500',
-            chance: 0.01  // 1%概率
-        },
-        '天水灵根': {
-            tier: '天灵根',
-            element: '水',
-            cultivationBonus: 1.5,
-            skillBonus: 1.3,
-            alchemyBonus: 1.4,  // 水灵根炼丹更强
-            combatBonus: { water: 0.3 },
-            description: '天灵根之最，水之精华，炼丹如神',
-            color: '#1E90FF',
-            chance: 0.01
-        },
-        '天木灵根': {
-            tier: '天灵根',
-            element: '木',
-            cultivationBonus: 1.5,
-            skillBonus: 1.3,
-            alchemyBonus: 1.3,
-            combatBonus: { wood: 0.3 },
-            healingBonus: 0.3,  // 木灵根治疗效果+30%
-            description: '天灵根之最，生命之源，恢复如神',
-            color: '#228B22',
-            chance: 0.01
-        },
-        '天金灵根': {
-            tier: '天灵根',
-            element: '金',
-            cultivationBonus: 1.5,
-            skillBonus: 1.3,
-            alchemyBonus: 1.1,
-            combatBonus: { metal: 0.3 },
-            attackBonus: 0.2,  // 金灵根攻击力+20%
-            description: '天灵根之最，锋芒毕露，战力如神',
-            color: '#FFD700',
-            chance: 0.01
-        },
-        '天土灵根': {
-            tier: '天灵根',
-            element: '土',
-            cultivationBonus: 1.5,
-            skillBonus: 1.3,
-            alchemyBonus: 1.1,
-            combatBonus: { earth: 0.3 },
-            defenseBonus: 0.2,  // 土灵根防御力+20%
-            description: '天灵根之最，厚德载物，防御如神',
-            color: '#8B4513',
-            chance: 0.01
-        },
-        // 地灵根（双元素，较强）
-        '水木灵根': {
-            tier: '地灵根',
-            elements: ['水', '木'],
-            cultivationBonus: 1.25,
-            skillBonus: 1.15,
-            alchemyBonus: 1.3,
-            healingBonus: 0.15,
-            description: '水木相生，修炼与炼丹皆有优势',
-            color: '#20B2AA',
-            chance: 0.05
-        },
-        '火土灵根': {
-            tier: '地灵根',
-            elements: ['火', '土'],
-            cultivationBonus: 1.25,
-            skillBonus: 1.15,
-            alchemyBonus: 1.1,
-            combatBonus: { fire: 0.15, earth: 0.15 },
-            description: '火土相济，战力与防御皆佳',
-            color: '#CD5C5C',
-            chance: 0.05
-        },
-        '金木灵根': {
-            tier: '地灵根',
-            elements: ['金', '木'],
-            cultivationBonus: 1.25,
-            skillBonus: 1.15,
-            alchemyBonus: 1.2,
-            attackBonus: 0.1,
-            healingBonus: 0.1,
-            description: '金木相克，攻守平衡',
-            color: '#9ACD32',
-            chance: 0.05
-        },
-        // 人灵根（三元素，普通）
-        '金木水灵根': {
-            tier: '人灵根',
-            elements: ['金', '木', '水'],
-            cultivationBonus: 1.1,
-            skillBonus: 1.05,
-            alchemyBonus: 1.15,
-            description: '三灵根，中规中矩',
-            color: '#4682B4',
-            chance: 0.2
-        },
-        '木水火灵根': {
-            tier: '人灵根',
-            elements: ['木', '水', '火'],
-            cultivationBonus: 1.1,
-            skillBonus: 1.05,
-            alchemyBonus: 1.2,
-            combatBonus: { fire: 0.1 },
-            description: '三灵根，修炼平稳',
-            color: '#DC143C',
-            chance: 0.2
-        },
-        '水火土灵根': {
-            tier: '人灵根',
-            elements: ['水', '火', '土'],
-            cultivationBonus: 1.1,
-            skillBonus: 1.05,
-            alchemyBonus: 1.1,
-            combatBonus: { fire: 0.1, earth: 0.1 },
-            description: '三灵根，水火交融',
-            color: '#B8860B',
-            chance: 0.2
-        },
-        // 杂灵根（四/五元素，较弱）
-        '四系灵根': {
-            tier: '杂灵根',
-            elements: ['金', '木', '水', '火'],
-            cultivationBonus: 1.0,
-            skillBonus: 1.0,
-            alchemyBonus: 1.0,
-            description: '四系杂灵根，修炼缓慢',
-            color: '#808080',
-            chance: 0.3
-        },
-        '五系灵根': {
-            tier: '杂灵根',
-            elements: ['金', '木', '水', '火', '土'],
-            cultivationBonus: 0.9,  // 修炼速度-10%
-            skillBonus: 0.95,     // 功法学习-5%
-            alchemyBonus: 1.0,
-            description: '五系杂灵根，仙途艰难',
-            color: '#696969',
-            chance: 0.05
-        }
-    },
-
     // 境界配置
     realms: {
         '炼气期': {
@@ -933,178 +781,6 @@ const CONFIG = {
             requirements: { realm: '炼虚期', level: 1 }
         }
     ],
-
-    // 副本配置
-    dungeons: {
-        'wolf_mountain': {
-            id: 'wolf_mountain',
-            name: '狼山',
-            description: '群狼聚集的山峰，低级修士的试炼场',
-            tier: '凡阶',
-            minRealm: '炼气期',
-            minLevel: 1,
-            monsters: ['wolf_1', 'wolf_2'],
-            boss: {
-                id: 'wolf_boss',
-                name: '狼王',
-                hp: 150,
-                attack: 20,
-                defense: 10,
-                rewards: {
-                    spiritStones: [200, 400],
-                    cultivation: [100, 200],
-                    items: ['筑基丹', '铁剑'],
-                    dropRate: 0.5
-                }
-            },
-            completionRewards: {
-                spiritStones: 500,
-                cultivation: 250,
-                items: ['聚气丹', '聚气丹', '聚气丹']
-            },
-            unlockRequirements: { realm: '炼气期', level: 1 }
-        },
-        'snake_valley': {
-            id: 'snake_valley',
-            name: '蛇谷',
-            description: '毒蛇横行的山谷，稍有不慎便会丧命',
-            tier: '凡阶',
-            minRealm: '炼气期',
-            minLevel: 3,
-            monsters: ['snake_1', 'snake_2'],
-            boss: {
-                id: 'snake_boss',
-                name: '蛇妖',
-                hp: 200,
-                attack: 25,
-                defense: 12,
-                rewards: {
-                    spiritStones: [300, 600],
-                    cultivation: [150, 300],
-                    items: ['筑基丹', '洗髓丹'],
-                    dropRate: 0.4
-                }
-            },
-            completionRewards: {
-                spiritStones: 800,
-                cultivation: 400,
-                items: ['筑基丹', '灵石袋']
-            },
-            unlockRequirements: { realm: '炼气期', level: 5 }
-        },
-        'bandit_hideout': {
-            id: 'bandit_hideout',
-            name: '山贼据点',
-            description: '山贼盘踞的据点，有许多宝物',
-            tier: '凡阶',
-            minRealm: '炼气期',
-            minLevel: 5,
-            monsters: ['bandit_1', 'bandit_2'],
-            boss: {
-                id: 'bandit_boss',
-                name: '山贼大王',
-                hp: 300,
-                attack: 35,
-                defense: 18,
-                rewards: {
-                    spiritStones: [500, 1000],
-                    cultivation: [250, 500],
-                    items: ['洗髓丹', '灵石袋'],
-                    dropRate: 0.5
-                }
-            },
-            completionRewards: {
-                spiritStones: 1500,
-                cultivation: 750,
-                items: ['洗髓丹', '悟性丹']
-            },
-            unlockRequirements: { realm: '炼气期', level: 9 }
-        },
-        'tiger_cave': {
-            id: 'tiger_cave',
-            name: '猛虎洞',
-            description: '猛虎栖息的洞穴，危险异常',
-            tier: '灵阶',
-            minRealm: '筑基期',
-            minLevel: 1,
-            monsters: ['tiger_1', 'tiger_2'],
-            boss: {
-                id: 'tiger_boss',
-                name: '虎王',
-                hp: 800,
-                attack: 100,
-                defense: 50,
-                rewards: {
-                    spiritStones: [1000, 2000],
-                    cultivation: [500, 1000],
-                    items: ['金剑', '护甲'],
-                    dropRate: 0.4
-                }
-            },
-            completionRewards: {
-                spiritStones: 3000,
-                cultivation: 1500,
-                items: ['筑基丹', '筑基丹', '洗髓丹']
-            },
-            unlockRequirements: { realm: '筑基期', level: 3 }
-        },
-        'demon_forest': {
-            id: 'demon_forest',
-            name: '妖兽森林',
-            description: '妖兽出没的森林，只有强者敢于进入',
-            tier: '灵阶',
-            minRealm: '筑基期',
-            minLevel: 5,
-            monsters: ['demon_1', 'demon_2'],
-            boss: {
-                id: 'demon_boss',
-                name: '妖王',
-                hp: 1500,
-                attack: 150,
-                defense: 75,
-                rewards: {
-                    spiritStones: [2000, 4000],
-                    cultivation: [1000, 2000],
-                    items: ['悟性丹', '法宝材料'],
-                    dropRate: 0.3
-                }
-            },
-            completionRewards: {
-                spiritStones: 5000,
-                cultivation: 2500,
-                items: ['悟性丹', '天劫符']
-            },
-            unlockRequirements: { realm: '筑基期', level: 9 }
-        },
-        'ancient_ruins': {
-            id: 'ancient_ruins',
-            name: '上古遗迹',
-            description: '上古修仙者留下的遗迹，宝物与危险并存',
-            tier: '圣阶',
-            minRealm: '金丹期',
-            minLevel: 1,
-            monsters: ['cultivator_1', 'cultivator_2', 'beast_king_1'],
-            boss: {
-                id: 'ancient_guardian',
-                name: '遗迹守护者',
-                hp: 3000,
-                attack: 200,
-                defense: 100,
-                rewards: {
-                    spiritStones: [5000, 10000],
-                    cultivation: [2500, 5000],
-                    items: ['仙阶法宝', '天劫符'],
-                    dropRate: 0.2
-                }
-            },
-            completionRewards: {
-                spiritStones: 15000,
-                cultivation: 7500,
-                items: ['仙阶法宝', '飞升令']
-            },
-            unlockRequirements: { realm: '金丹期', level: 5 }
-        }
-    },
 
     // 打坐时的随机事件
     meditationEvents: [
@@ -2304,6 +1980,386 @@ const ASCII_ART = {
 ▼
     `,
 
+    // ==================== NPC配置 ====================
+    npcs: {
+        'sect_elder': {
+            id: 'sect_elder',
+            name: '宗门长老',
+            title: '青云宗长老',
+            description: '负责管理宗门事务的威严长者',
+            avatar: '👴',
+            location: 'sect',
+            requirements: { sect: 'qingyun_sect', sectRank: '外门弟子' },
+            dialogs: {
+                'greeting': {
+                    text: '年轻人，看你骨骼精奇，是个修仙的好苗子。在宗门好好修炼，莫要辜负了你的天赋。',
+                    options: [
+                        { text: '请长老指点', next: 'teachings' },
+                        { text: '我想了解更多关于宗门', next: 'about_sect' },
+                        { text: '告辞', next: null }
+                    ]
+                },
+                'teachings': {
+                    text: '修仙之路，贵在坚持。炼气期打好基础，筑基期稳固根基，金丹期凝结元婴，方能踏上大道。',
+                    options: [
+                        { text: '受教了', next: null },
+                        { text: '还有其他建议吗？', next: 'advice' }
+                    ]
+                },
+                'advice': {
+                    text: '多历练、多参悟。切勿急功近利，否则容易走火入魔。另外，与宗门同仁搞好关系，对你的修行大有裨益。',
+                    options: [
+                        { text: '明白了', next: null }
+                    ]
+                },
+                'about_sect': {
+                    text: '我青云宗乃是方圆千里内的大宗，历史悠久，强者如云。只要你努力修炼，提升声望，宗门自会给你更多资源。',
+                    options: [
+                        { text: '我会努力的', next: null }
+                    ]
+                }
+            },
+            actions: [
+                { type: 'give_gift', description: '赠送礼物（提升好感度）' },
+                { type: 'request_guidance', description: '请求指点（提升修炼速度）' },
+                { type: 'sect_mission', description: '领取宗门任务' }
+            ],
+            gifts: {
+                '聚气丹': { affection: 5 },
+                '筑基丹': { affection: 20 },
+                '灵石': { affection: 0.01 } // 每个灵石+0.01好感度
+            }
+        },
+        'mysterious_taoist': {
+            id: 'mysterious_taoist',
+            name: '神秘道人',
+            title: '云游四方的修仙者',
+            description: '一身灰袍，来去无踪，似乎知道许多秘密',
+            avatar: '🧙',
+            location: 'adventure',
+            requirements: { realm: '炼气期', level: 5 },
+            dialogs: {
+                'greeting': {
+                    text: '呵呵，年轻人，你我相遇即是缘分。看你气息不凡，想必不是池中之物。',
+                    options: [
+                        { text: '前辈过奖了', next: 'humble' },
+                        { text: '您是何人？', next: 'identity' },
+                        { text: '告辞', next: null }
+                    ]
+                },
+                'humble': {
+                    text: '不必过谦。修仙界实力为尊，只要你足够强大，就有资格骄傲。',
+                    options: [
+                        { text: '请教前辈修行之法', next: 'teach_secret' }
+                    ]
+                },
+                'identity': {
+                    text: '我不过是一介闲云野鹤，云游四海罢了。倒是有些秘闻，不知你是否有兴趣听闻？',
+                    options: [
+                        { text: '愿闻其详', next: 'secret_rumor' },
+                        { text: '以后再说', next: null }
+                    ]
+                },
+                'teach_secret': {
+                    text: '修行无捷径，唯有坚持二字。不过...若你能在历练中遇到机缘，或许能得偿所愿。',
+                    options: [
+                        { text: '多谢前辈指点', next: null, effect: { type: 'buff', value: 'cultivation', duration: 300000 } }
+                    ]
+                },
+                'secret_rumor': {
+                    text: '听说...在东边深山之中，有一处古修洞府，藏有上古宝物。但那里也是妖兽聚集之地，凶险异常。',
+                    options: [
+                        { text: '多谢前辈告知', next: null, effect: { type: 'unlock_location', value: 'ancient_cave' } }
+                    ]
+                }
+            },
+            actions: [
+                { type: 'give_gift', description: '赠送礼物' },
+                { type: 'buy_info', description: '购买情报（需灵石）' }
+            ],
+            gifts: {
+                '灵石': { affection: 0.02 },
+                '洗髓丹': { affection: 15 }
+            }
+        },
+        'merchant': {
+            id: 'merchant',
+            name: '坊市商人',
+            title: '万宝楼掌柜',
+            description: '精明的商人，似乎什么都能买到',
+            avatar: '🧔',
+            location: 'market',
+            requirements: { spiritStones: 100 },
+            dialogs: {
+                'greeting': {
+                    text: '客官，欢迎光临万宝楼！本店丹药、法宝、功法应有尽有，您想看点什么？',
+                    options: [
+                        { text: '看看有什么好东西', next: 'show_items' },
+                        { text: '打听行情', next: 'market_info' },
+                        { text: '只是路过', next: null }
+                    ]
+                },
+                'show_items': {
+                    text: '今日新到了一批聚气丹，效果不俗。另外还有几件不错的法宝，您有需要吗？',
+                    options: [
+                        { text: '购买聚气丹', action: 'buy_item', item: '聚气丹' },
+                        { text: '下次再来', next: null }
+                    ]
+                },
+                'market_info': {
+                    text: '最近坊市里灵石行情看涨，听闻大宗门都在收购灵石储备物资。若是手头宽裕，多囤些丹药总是没错的。',
+                    options: [
+                        { text: '多谢告知', next: null }
+                    ]
+                }
+            },
+            actions: [
+                { type: 'trade', description: '交易物品' },
+                { type: 'give_gift', description: '赠送礼物' }
+            ],
+            gifts: {
+                '灵石': { affection: 0.05 },
+                '稀有物品': { affection: 10 }
+            }
+        }
+    },
+
+    // ==================== 剧情任务配置 ====================
+    storyQuests: {
+        // 第一章：初入仙途
+        'chapter1_start': {
+            id: 'chapter1_start',
+            chapter: 1,
+            name: '初入仙途',
+            description: '刚踏入修仙界的你，需要了解这个世界的规则',
+            type: 'main',
+            requirements: { realm: '炼气期', level: 1 },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '初次修炼',
+                    description: '尝试修炼，感受灵气在体内流动',
+                    objective: { type: 'cultivate', target: 100 },
+                    rewards: [
+                        { type: 'spirit_stones', value: 50 },
+                        { type: 'item', value: '聚气丹', quantity: 2 }
+                    ],
+                    onComplete: {
+                        message: '你成功感受到了灵气的存在！这感觉真是奇妙。',
+                        unlocks: ['chapter1_stage2']
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '突破一层',
+                    description: '将修为提升到突破的临界点',
+                    objective: { type: 'breakthrough', target: 2 },
+                    rewards: [
+                        { type: 'spirit_stones', value: 100 },
+                        { type: 'cultivation', value: 50 }
+                    ],
+                    onComplete: {
+                        message: '成功突破到炼气期二层！你的修为有了明显提升。',
+                        unlocks: ['chapter1_stage3']
+                    }
+                },
+                {
+                    id: 'stage3',
+                    name: '第一次历练',
+                    description: '离开安全区，去外面的世界看看',
+                    objective: { type: 'adventure', target: 1 },
+                    rewards: [
+                        { type: 'item', value: '洗髓丹' },
+                        { type: 'spirit_stones', value: 150 }
+                    ],
+                    onComplete: {
+                        message: '历练归来，你对外面的世界有了更多了解。',
+                        unlocks: ['chapter1_stage4'],
+                        setFlag: { flag: 'completed_first_adventure', value: true }
+                    }
+                },
+                {
+                    id: 'stage4',
+                    name: '选择宗门',
+                    description: '是时候决定你的归属了',
+                    objective: { type: 'join_sect', target: 1 },
+                    rewards: [
+                        { type: 'spirit_stones', value: 200 },
+                        { type: 'item', value: '筑基丹', quantity: 1 }
+                    ],
+                    onComplete: {
+                        message: '恭喜！你已成为宗门一员，修仙之路正式开启！',
+                        unlocks: ['chapter2_start'],
+                        nextChapter: 2
+                    }
+                }
+            ]
+        },
+
+        // 第二章：宗门生涯
+        'chapter2_start': {
+            id: 'chapter2_start',
+            chapter: 2,
+            name: '宗门生涯',
+            description: '在宗门中努力修炼，争取早日筑基',
+            type: 'main',
+            requirements: { sect: 'any', realm: '炼气期', level: 3 },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '宗门贡献',
+                    description: '为宗门做出贡献，提升声望',
+                    objective: { type: 'sect_contribution', target: 100 },
+                    rewards: [
+                        { type: 'sect_contribution', value: 50 },
+                        { type: 'spirit_stones', value: 200 }
+                    ],
+                    onComplete: {
+                        message: '你在宗门的地位有所提升。',
+                        unlocks: ['chapter2_stage2']
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '内门考核',
+                    description: '通过内门弟子考核',
+                    objective: { type: 'sect_rank', target: '内门弟子' },
+                    rewards: [
+                        { type: 'skill', value: '基础剑法' },
+                        { type: 'item', value: '筑基丹', quantity: 2 }
+                    ],
+                    onComplete: {
+                        message: '成为内门弟子！你可以学习更高深的功法了。',
+                        unlocks: ['chapter2_stage3']
+                    }
+                },
+                {
+                    id: 'stage3',
+                    name: '筑基准备',
+                    description: '收集筑基所需的资源',
+                    objective: { type: 'collect_items', items: { '筑基丹': 1 } },
+                    rewards: [
+                        { type: 'item', value: '天劫符' },
+                        { type: 'cultivation', value: 200 }
+                    ],
+                    onComplete: {
+                        message: '筑基的准备已经完成，只待时机成熟！',
+                        unlocks: ['chapter2_stage4']
+                    }
+                },
+                {
+                    id: 'stage4',
+                    name: '筑基天劫',
+                    description: '渡过筑基天劫，进入筑基期',
+                    objective: { type: 'tribulation', target: '筑基期' },
+                    rewards: [
+                        { type: 'artifact', value: '青霜剑' },
+                        { type: 'spirit_stones', value: 1000 }
+                    ],
+                    onComplete: {
+                        message: '恭喜！你成功筑基，踏入修仙界的更高层次！',
+                        unlocks: ['chapter3_start'],
+                        nextChapter: 3
+                    }
+                }
+            ]
+        },
+
+        // 支线任务：身世之谜
+        'side_mystery': {
+            id: 'side_mystery',
+            chapter: 0,
+            name: '身世之谜',
+            description: '探索你的身世，寻找真相',
+            type: 'side',
+            requirements: { realm: '炼气期', level: 5, flag: 'completed_first_adventure' },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '神秘信物',
+                    description: '检查随身物品，发现一个古老的玉佩',
+                    objective: { type: 'check_inventory', trigger: 0.3 }, // 30%概率在历练时触发
+                    rewards: [
+                        { type: 'item', value: '神秘玉佩' }
+                    ],
+                    onComplete: {
+                        message: '你在一次历练中发现了自己随身携带的神秘玉佩，上面刻着奇异的符文。',
+                        unlocks: ['side_mystery_stage2'],
+                        setFlag: { flag: 'found_mysterious_jade', value: true }
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '寻找线索',
+                    description: '询问NPC关于玉佩的信息',
+                    objective: { type: 'npc_dialog', npc: 'mysterious_taoist', dialog: 'jade_inquiry' },
+                    rewards: [
+                        { type: 'cultivation', value: 100 },
+                        { type: 'info', value: '玉佩来自上古修仙家族' }
+                    ],
+                    onComplete: {
+                        message: '神秘道人告诉你，这玉佩来自一个早已消失的上古修仙家族。',
+                        unlocks: ['side_mystery_stage3']
+                    }
+                },
+                {
+                    id: 'stage3',
+                    name: '探索遗迹',
+                    description: '前往玉佩指示的地点',
+                    objective: { type: 'explore_realm', realm: 'ancient_ruins' },
+                    rewards: [
+                        { type: 'item', value: '家族传承功法' },
+                        { type: 'spirit_stones', value: 500 }
+                    ],
+                    onComplete: {
+                        message: '在遗迹中，你发现了家族的传承功法！原来你是上古修仙家族的后裔！',
+                        setFlag: { flag: 'discovered_heritage', value: true }
+                    }
+                }
+            ]
+        },
+
+        // 支线任务：宗门荣耀
+        'side_sect_glory': {
+            id: 'side_sect_glory',
+            chapter: 0,
+            name: '宗门荣耀',
+            description: '为宗门争光，提升宗门声望',
+            type: 'side',
+            requirements: { sect: 'any', realm: '筑基期' },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '宗门大比',
+                    description: '参加宗门大比，展示实力',
+                    objective: { type: 'defeat_monsters', count: 10, minRealm: '筑基期' },
+                    rewards: [
+                        { type: 'sect_reputation', value: 50 },
+                        { type: 'spirit_stones', value: 300 }
+                    ],
+                    onComplete: {
+                        message: '你在宗门大比中表现出色，为宗门赢得了荣誉！',
+                        unlocks: ['side_sect_glory_stage2']
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '宗门战争',
+                    description: '参与宗门战争，击退敌对宗门',
+                    objective: { type: 'sect_war', victory: true },
+                    rewards: [
+                        { type: 'sect_reputation', value: 100 },
+                        { type: 'artifact', value: '宗门令牌' }
+                    ],
+                    onComplete: {
+                        message: '你成功击退敌对宗门，成为宗门的英雄！',
+                        setFlag: { flag: 'sect_hero', value: true }
+                    }
+                }
+            ]
+        }
+    }
+};
 
 // ==================== 游戏状态 ====================
 class GameState {
@@ -2317,7 +2373,6 @@ class GameState {
             this.daoName = characterData.daoName;
             this.background = characterData.background;
             this.talents = characterData.talents;
-            this.spiritualRoot = characterData.spiritualRoot || this.generateRandomSpiritualRoot();
         } else {
             // 默认值 - 用于加载存档时的实例化
             this.playerName = '凡人';
@@ -2329,7 +2384,6 @@ class GameState {
                 potential: 0,
                 fortune: 0
             };
-            this.spiritualRoot = null; // 加载存档时可能没有灵根
         }
 
         // 修仙状态
@@ -2421,20 +2475,11 @@ class GameState {
 
         // 只在创建新角色时应用出身加成（不处理从存档加载的情况）
         if (!characterData || !characterData.playerName) {
-            // 生成灵根（如果没有的话）
-            if (!this.spiritualRoot) {
-                this.spiritualRoot = this.generateRandomSpiritualRoot();
-            }
-
             this.applyBackgroundBonus();
             // 新角色自动学习第一个战斗技能
             this.learnInitialCombatSkill();
             // 新角色获得初始法宝
             this.giveInitialArtifact();
-        } else if (!this.spiritualRoot) {
-            // 为旧存档添加默认灵根（兼容性处理）
-            this.spiritualRoot = this.generateRandomSpiritualRoot();
-            this.addLog(`觉醒了${this.spiritualRoot}！`, 'rare');
         }
     }
 
@@ -2448,51 +2493,6 @@ class GameState {
         const title = Math.random() < 0.3 ? titles[Math.floor(Math.random() * titles.length)] : '';
 
         return surname + name + title;
-    }
-
-    // 生成随机灵根
-    generateRandomSpiritualRoot() {
-        // 根据概率随机选择灵根
-        const roots = Object.entries(CONFIG.spiritualRoots);
-        const roll = Math.random();
-        let cumulative = 0;
-
-        for (const [rootName, rootConfig] of roots) {
-            cumulative += rootConfig.chance;
-            if (roll <= cumulative) {
-                return rootName;
-            }
-        }
-
-        // 如果概率不匹配，返回默认杂灵根
-        return '四系灵根';
-    }
-
-    // 获取灵根配置
-    getSpiritualRootConfig() {
-        if (!this.spiritualRoot) return null;
-        return CONFIG.spiritualRoots[this.spiritualRoot];
-    }
-
-    // 计算灵根对修炼速度的影响
-    getSpiritualRootCultivationBonus() {
-        const rootConfig = this.getSpiritualRootConfig();
-        if (!rootConfig) return 1.0;
-        return rootConfig.cultivationBonus || 1.0;
-    }
-
-    // 计算灵根对功法学习的影响
-    getSpiritualRootSkillBonus() {
-        const rootConfig = this.getSpiritualRootConfig();
-        if (!rootConfig) return 1.0;
-        return rootConfig.skillBonus || 1.0;
-    }
-
-    // 计算灵根对炼丹的影响
-    getSpiritualRootAlchemyBonus() {
-        const rootConfig = this.getSpiritualRootConfig();
-        if (!rootConfig) return 1.0;
-        return rootConfig.alchemyBonus || 1.0;
     }
 
     applyBackgroundBonus() {
@@ -2525,7 +2525,7 @@ class GameState {
     // 新角色学习初始战斗技能
     learnInitialCombatSkill() {
         // 自动学习剑气术（第一个技能，无要求）
-        const initialSkillId = '剑气术';
+        const initialSkillId = 'sword_qi';
         const result = this.learnCombatSkill(initialSkillId);
         if (result.success) {
             this.activeCombatSkill = initialSkillId;
@@ -2737,9 +2737,6 @@ class GameState {
     calculateBaseCultivationRate() {
         const realmConfig = CONFIG.realms[this.realm];
         let rate = realmConfig.baseCultivationRate;
-
-        // 灵根加成（最重要的加成）
-        rate *= this.getSpiritualRootCultivationBonus();
 
         // 功法加成
         if (this.currentSkill && this.skills[this.currentSkill]) {
@@ -4658,11 +4655,8 @@ class GameState {
 
         this.spiritStones -= 100;
 
-        // 炼丹有成功率，受悟性、灵根和宗门影响
+        // 炼丹有成功率，受悟性和宗门影响
         let successRate = 0.6 + this.talents.wisdom * 0.02;
-
-        // 灵根加成
-        successRate += (this.getSpiritualRootAlchemyBonus() - 1) * 0.3;
 
         // 宗门加成
         if (this.sect !== 'none') {
@@ -4671,9 +4665,6 @@ class GameState {
                 successRate += sect.benefits.alchemyBonus;
             }
         }
-
-        // 限制成功率在0.1-0.95之间
-        successRate = Math.max(0.1, Math.min(0.95, successRate));
 
         if (Math.random() < successRate) {
             const items = ['聚气丹', '聚气丹', '聚气丹', '筑基丹', '洗髓丹', '悟性丹'];
@@ -4966,19 +4957,6 @@ class GameUI {
     updateCharacterDisplay() {
         document.getElementById('playerNameDisplay').textContent = this.state.playerName;
         document.getElementById('daoNameDisplay').textContent = this.state.daoName;
-
-        // 更新灵根显示
-        const spiritualRootDisplay = document.getElementById('spiritualRootDisplay');
-        if (spiritualRootDisplay && this.state.spiritualRoot) {
-            const rootConfig = this.state.getSpiritualRootConfig();
-            if (rootConfig) {
-                spiritualRootDisplay.textContent = this.state.spiritualRoot;
-                spiritualRootDisplay.style.color = rootConfig.color;
-                spiritualRootDisplay.setAttribute('title', rootConfig.description);
-            } else {
-                spiritualRootDisplay.textContent = this.state.spiritualRoot || '未知';
-            }
-        }
     }
 
     bindEvents() {
@@ -5763,298 +5741,14 @@ class GameUI {
         modalBody.querySelectorAll('.realm-card').forEach(card => {
             card.addEventListener('click', () => {
                 const realmId = card.getAttribute('data-realm-id');
-                this.showSecretRealmDetail(realmId);
+                const result = this.state.startExploration(realmId);
+                if (result) {
+                    modal.classList.remove('active');
+                }
             });
         });
 
         modal.classList.add('active');
-    }
-
-    // 显示秘境详情和互动界面
-    showSecretRealmDetail(realmId) {
-        const realm = CONFIG.secretRealms.find(r => r.id === realmId);
-        if (!realm) return;
-
-        const modal = document.getElementById('gameModal');
-        const modalBody = document.getElementById('modalBody');
-        const modalHeader = document.getElementById('modalHeader');
-
-        modalHeader.querySelector('pre').textContent = `┌─── ${realm.name} ───┐`;
-
-        let content = `
-            <div class="realm-detail">
-                <div style="margin-bottom: 20px; padding: 15px; background: rgba(0, 255, 0, 0.05); border: 1px solid var(--border-color);">
-                    <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">${realm.description}</div>
-                    <div style="display: flex; gap: 15px; font-size: 11px; color: var(--text-primary);">
-                        <div><span style="color: var(--warning-color);">难度：</span>${'⭐'.repeat(realm.difficulty)} (${realm.difficulty}/5)</div>
-                        <div><span style="color: var(--accent-color);">耗时：</span>${realm.duration / 1000}秒</div>
-                        <div><span style="color: var(--danger-color);">风险：</span>${(realm.risk * 100).toFixed(0)}%</div>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-                    <button class="realm-action-btn" data-action="explore" data-realm="${realmId}" style="flex: 1; min-width: 120px; padding: 12px; background: var(--accent-color); border: none; color: white; cursor: pointer; border-radius: 4px;">
-                        <div style="font-size: 16px; margin-bottom: 5px;">🗺️</div>
-                        <div style="font-size: 12px;">探索</div>
-                    </button>
-                    <button class="realm-action-btn" data-action="gather" data-realm="${realmId}" style="flex: 1; min-width: 120px; padding: 12px; background: var(--success-color); border: none; color: white; cursor: pointer; border-radius: 4px;">
-                        <div style="font-size: 16px; margin-bottom: 5px;">⛏️</div>
-                        <div style="font-size: 12px;">采集</div>
-                    </button>
-                    <button class="realm-action-btn" data-action="challenge" data-realm="${realmId}" style="flex: 1; min-width: 120px; padding: 12px; background: var(--danger-color); border: none; color: white; cursor: pointer; border-radius: 4px;">
-                        <div style="font-size: 16px; margin-bottom: 5px;">⚔️</div>
-                        <div style="font-size: 12px;">挑战</div>
-                    </button>
-                </div>
-
-                <div class="realm-rewards-info" style="padding: 15px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 4px;">
-                    <div style="font-weight: bold; color: var(--rare-color); margin-bottom: 10px;">📦 可能奖励</div>
-                    <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.8;">
-        `;
-
-        // 显示可能的奖励
-        if (realm.outcomes) {
-            realm.outcomes.forEach(outcome => {
-                if (outcome.rewards) {
-                    outcome.rewards.forEach(reward => {
-                        let rewardText = '';
-                        if (reward.type === 'cultivation') {
-                            rewardText = `修为 +${Array.isArray(reward.value) ? `${reward.value[0]}-${reward.value[1]}` : reward.value}`;
-                        } else if (reward.type === 'spirit_stones' || reward.type === 'spiritStones') {
-                            rewardText = `灵石 +${Array.isArray(reward.value) ? `${reward.value[0]}-${reward.value[1]}` : reward.value}`;
-                        } else if (reward.type === 'item') {
-                            rewardText = `物品 ${reward.value}`;
-                        } else if (reward.type === 'skill') {
-                            rewardText = `功法 ${reward.value}`;
-                        } else if (reward.type === 'artifact') {
-                            rewardText = `法宝 ${reward.value}`;
-                        }
-                        if (rewardText) {
-                            content += `<div style="color: var(--success-color);">✓ ${rewardText} (${(outcome.chance * 100).toFixed(0)}%)</div>`;
-                        }
-                    });
-                }
-            });
-        }
-
-        // 添加风险提示
-        if (realm.outcomes) {
-            realm.outcomes.forEach(outcome => {
-                if (outcome.penalty) {
-            content += `
-                    </div>
-                </div>
-
-                <div class="realm-risks-info" style="margin-top: 15px; padding: 15px; background: rgba(255, 0, 0, 0.05); border: 1px solid var(--danger-color); border-radius: 4px;">
-                    <div style="font-weight: bold; color: var(--danger-color); margin-bottom: 10px;">⚠️ 潜在风险</div>
-                    <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.8;">
-            `;
-                    let penalty = outcome.penalty;
-                    let riskText = '';
-                    if (penalty.type === 'cultivation_loss') {
-                        riskText = `修为损失 ${Array.isArray(penalty.value) ? `${penalty.value[0]}-${penalty.value[1]}` : penalty.value}`;
-                    } else if (penalty.type === 'injured' || penalty.type === 'heavy_injured') {
-                        riskText = `受伤 ${Array.isArray(penalty.value) ? `${penalty.value[0]}-${penalty.value[1]}` : penalty.value}点生命`;
-                    }
-                    if (riskText) {
-                        content += `<div style="color: var(--danger-color);">✗ ${riskText} (${(outcome.chance * 100).toFixed(0)}%)</div>`;
-                    }
-                }
-            });
-        }
-
-        content += `
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px; text-align: center;">
-                    <button class="modal-close-btn" style="padding: 10px 30px; background: var(--text-secondary); border: none; color: white; cursor: pointer; border-radius: 4px;">[返回]</button>
-                </div>
-            </div>
-        `;
-
-        modalBody.innerHTML = content;
-
-        // 添加操作按钮事件
-        modalBody.querySelectorAll('.realm-action-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const action = btn.getAttribute('data-action');
-                const realmId = btn.getAttribute('data-realm');
-                this.handleRealmAction(action, realmId);
-            });
-        });
-
-        // 添加返回按钮事件
-        const closeBtn = modalBody.querySelector('.modal-close-btn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                this.showSecretRealms(); // 返回秘境列表
-            });
-        }
-
-        modal.classList.add('active');
-    }
-
-    // 处理秘境操作
-    handleRealmAction(action, realmId) {
-        const realm = CONFIG.secretRealms.find(r => r.id === realmId);
-        if (!realm) return;
-
-        switch (action) {
-            case 'explore':
-                // 探索操作
-                this.state.addLog(`在${realm.name}中探索...`, 'info');
-                this.performRealmExploration(realm);
-                break;
-            case 'gather':
-                // 采集操作
-                this.state.addLog(`在${realm.name}中采集资源...`, 'info');
-                this.performRealmGathering(realm);
-                break;
-            case 'challenge':
-                // 挑战操作 - 进入战斗
-                this.state.addLog(`在${realm.name}中遇到守护者！`, 'warning');
-                this.performRealmChallenge(realm);
-                break;
-        }
-    }
-
-    // 执行秘境探索
-    performRealmExploration(realm) {
-        const luckBonus = this.state.calculateCombatStats().luckBonus;
-        const modifiedChance = Math.min(1, realm.risk - luckBonus * 0.05); // 幸运降低风险
-
-        if (Math.random() >= modifiedChance && realm.outcomes) {
-            // 根据概率选择一个结果
-            const roll = Math.random();
-            let cumulative = 0;
-            let selectedOutcome = null;
-
-            for (const outcome of realm.outcomes) {
-                cumulative += outcome.chance;
-                if (roll <= cumulative) {
-                    selectedOutcome = outcome;
-                    break;
-                }
-            }
-
-            if (selectedOutcome) {
-                if (selectedOutcome.rewards) {
-                    selectedOutcome.rewards.forEach(reward => {
-                        this.grantRealmReward(reward);
-                    });
-                }
-                if (selectedOutcome.penalty) {
-                    this.applyRealmPenalty(selectedOutcome.penalty);
-                }
-            }
-        } else {
-            this.state.addLog('探索失败，什么都没发现', 'info');
-        }
-
-        document.getElementById('gameModal').classList.remove('active');
-        this.updateDisplay();
-    }
-
-    // 执行秘境采集
-    performRealmGathering(realm) {
-        const gatheringItems = {
-            'ancient_cave': ['聚气丹', '筑基丹', '灵石袋'],
-            'spirit_mine': ['灵石袋', '灵石袋', '灵石袋', '筑基丹']
-        };
-
-        const items = gatheringItems[realm.id] || ['灵石袋'];
-        const item = items[Math.floor(Math.random() * items.length)];
-
-        if (Math.random() < 0.7) {
-            this.state.addItem(item);
-            this.state.addLog(`采集到了${item}！`, 'success');
-        } else {
-            this.state.addLog(`采集失败，什么都没找到`, 'info');
-        }
-
-        document.getElementById('gameModal').classList.remove('active');
-        this.updateDisplay();
-    }
-
-    // 执行秘境挑战
-    performRealmChallenge(realm) {
-        // 根据秘境难度生成敌人
-        const difficulty = realm.difficulty;
-        const monsters = CONFIG.monsters.filter(m => {
-            if (!m.requirements) return false;
-            const reqRealmIndex = Object.keys(CONFIG.realms).indexOf(m.requirements.realm);
-            const playerRealmIndex = Object.keys(CONFIG.realms).indexOf(this.state.realm);
-            return Math.abs(m.level - this.state.level) <= difficulty * 3 && playerRealmIndex >= reqRealmIndex;
-        });
-
-        if (monsters.length > 0) {
-            const monster = monsters[Math.floor(Math.random() * monsters.length)];
-            document.getElementById('gameModal').classList.remove('active');
-            this.showFightModal();
-        } else {
-            this.state.addLog('这个秘境暂时没有守护者', 'info');
-        }
-    }
-
-    // 发放秘境奖励
-    grantRealmReward(reward) {
-        switch (reward.type) {
-            case 'cultivation':
-                const cultivation = Array.isArray(reward.value)
-                    ? this.randomInt(reward.value[0], reward.value[1])
-                    : reward.value;
-                this.state.addCultivation(cultivation);
-                this.state.addLog(`获得了${cultivation}修为！`, 'success');
-                break;
-            case 'spiritStones':
-                const stones = Array.isArray(reward.value)
-                    ? this.randomInt(reward.value[0], reward.value[1])
-                    : reward.value;
-                this.state.spiritStones += stones;
-                this.state.addLog(`获得了${stones}灵石！`, 'success');
-                break;
-            case 'item':
-                this.state.addItem(reward.value);
-                break;
-            case 'skill':
-                const skillResult = this.state.learnSkill(reward.value);
-                if (skillResult.success) {
-                    this.state.addLog(`学会了功法：${reward.value}！`, 'legendary');
-                }
-                break;
-            case 'artifact':
-                const artifactResult = this.state.addArtifact(reward.value);
-                if (artifactResult.success) {
-                    this.state.addLog(`获得了法宝：${reward.value}！`, 'legendary');
-                }
-                break;
-        }
-    }
-
-    // 应用秘境惩罚
-    applyRealmPenalty(penalty) {
-        switch (penalty.type) {
-            case 'cultivation_loss':
-                const loss = Array.isArray(penalty.value)
-                    ? this.randomInt(penalty.value[0], penalty.value[1])
-                    : penalty.value;
-                this.state.cultivation = Math.max(0, this.state.cultivation - loss);
-                this.state.addLog(`修为损失了${loss}！`, 'danger');
-                break;
-            case 'injured':
-            case 'heavy_injured':
-                const damage = Array.isArray(penalty.value)
-                    ? this.randomInt(penalty.value[0], penalty.value[1])
-                    : penalty.value;
-                this.state.addLog(`受到了${damage}点伤害！`, 'danger');
-                break;
-        }
-    }
-
-    // 随机整数
-    randomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     getRealmTypeText(type) {
@@ -6521,7 +6215,7 @@ class GameUI {
 
         modalHeader.querySelector('pre').textContent = `┌─── ${tribulation.name} ───┐`;
 
-        const currentStats = this.state.calculateCombatStats();
+        const currentStats = this.calculateCombatStats();
         const baseChance = tribulation.baseSuccessRate;
 
         modalBody.innerHTML = `
@@ -6539,7 +6233,7 @@ class GameUI {
                 <div class="tribulation-status">
                     <div class="your-stats">
                         <h4>当前状态</h4>
-                        <p>境界：${this.state.realm} ${this.state.level}层</p>
+                        <p>境界：${this.realm} ${this.level}层</p>
                         <p>攻击：${currentStats.attack}</p>
                         <p>防御：${currentStats.defense}</p>
                         <p>生命：${currentStats.health}</p>
@@ -6561,10 +6255,10 @@ class GameUI {
 
         // 绑定按钮事件
         document.getElementById('startTribulationBtn').addEventListener('click', () => {
-            const result = this.state.startTribulation(targetRealm);
+            const result = this.startTribulation(targetRealm);
             if (result.success) {
                 modal.classList.remove('active');
-                this.state.addLog(result.message, 'rare');
+                this.addLog(result.message, 'rare');
                 // 开始渡劫动画效果（可以后续添加）
                 this.processTribulationWave();
             } else {
@@ -6581,15 +6275,11 @@ class GameUI {
 
     // 处理渡劫波次（用于游戏循环调用）
     processTribulationWave() {
-        if (!this.state.tribulationState || !this.state.tribulationState.isTribulating) return;
+        if (!this.tribulationState || !this.tribulationState.isTribulating) return;
 
         // 设置定时器模拟渡劫过程
         setTimeout(() => {
-            this.state.processTribulation();
-            // 继续下一波，直到完成
-            if (this.state.tribulationState && this.state.tribulationState.isTribulating) {
-                this.processTribulationWave();
-            }
+            this.processTribulation();
         }, 2000); // 每2秒一波
     }
 
@@ -7218,18 +6908,16 @@ class GameUI {
         `;
 
         if (availableSkills.length > 0) {
-            availableSkills.forEach(skillData => {
-                const skill = skillData.skill;
-                const skillId = skillData.id;
-                const isOnCooldown = this.state.combatSkillCooldowns[skillId] > Date.now();
+            availableSkills.forEach(skill => {
+                const isOnCooldown = this.state.combatSkillCooldowns[skill.id] > Date.now();
                 const cooldownText = isOnCooldown
-                    ? `冷却中 (${Math.ceil((this.state.combatSkillCooldowns[skillId] - Date.now()) / 1000)}秒)`
+                    ? `冷却中 (${Math.ceil((this.state.combatSkillCooldowns[skill.id] - Date.now()) / 1000)}秒)`
                     : skill.description;
                 const cooldownClass = isOnCooldown ? 'skill-on-cooldown' : '';
-                const selectedClass = this.state.activeCombatSkill === skillId ? 'skill-selected' : '';
+                const selectedClass = this.state.activeCombatSkill === skill.id ? 'skill-selected' : '';
 
                 html += `
-                    <div class="combat-skill-card ${cooldownClass} ${selectedClass}" data-skill="${skillId}">
+                    <div class="combat-skill-card ${cooldownClass} ${selectedClass}" data-skill="${skill.id}">
                         <div class="skill-card-name">${skill.name} <span style="font-size: 10px; color: var(--rare-color);">[${skill.tier}]</span></div>
                         <div class="skill-card-desc">${cooldownText}</div>
                         <div class="skill-card-effect">威力: ${skill.power}x | 消耗: ${skill.cost}</div>
