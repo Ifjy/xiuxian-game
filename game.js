@@ -223,6 +223,148 @@ const CONFIG = {
         }
     },
 
+    // 战斗技能配置
+    combatSkills: {
+        // === 攻击类技能 ===
+        '剑气术': {
+            id: 'sword_qi',
+            name: '剑气术',
+            type: 'attack',
+            tier: '人阶',
+            power: 1.5,
+            cooldown: 0, // 0表示无冷却
+            cost: 0,
+            description: '凝聚剑气，造成150%攻击伤害',
+            effect: 'damage_multiplier',
+            value: 0.5,
+            requirements: { realm: '炼气期', level: 1 }
+        },
+        '烈焰掌': {
+            id: 'flame_palm',
+            name: '烈焰掌',
+            type: 'attack',
+            tier: '人阶',
+            power: 1.8,
+            cooldown: 3,
+            cost: 10,
+            description: '燃烧的火焰掌力，造成180%攻击伤害，10%概率灼烧',
+            effect: 'damage_dot',
+            value: 0.1,
+            requirements: { realm: '炼气期', level: 3 }
+        },
+        '雷法': {
+            id: 'thunder_spell',
+            name: '雷法',
+            type: 'attack',
+            tier: '地阶',
+            power: 2.5,
+            cooldown: 5,
+            cost: 20,
+            description: '召唤雷电，造成250%攻击伤害',
+            effect: 'damage_multiplier',
+            value: 1.5,
+            requirements: { realm: '筑基期', level: 1 }
+        },
+        '飞剑术': {
+            id: 'flying_sword',
+            name: '飞剑术',
+            type: 'attack',
+            tier: '地阶',
+            power: 2.0,
+            cooldown: 4,
+            cost: 15,
+            description: '御剑飞行，无视部分防御（50%）',
+            effect: 'armor_penetration',
+            value: 0.5,
+            requirements: { realm: '金丹期', level: 1 }
+        },
+
+        // === 防御类技能 ===
+        '护体罡气': {
+            id: 'body_protection',
+            name: '护体罡气',
+            type: 'defense',
+            tier: '人阶',
+            power: 1.0,
+            cooldown: 5,
+            cost: 15,
+            description: '护体罡气，减少50%伤害，持续2回合',
+            effect: 'damage_reduction',
+            value: 0.5,
+            duration: 2,
+            requirements: { realm: '炼气期', level: 2 }
+        },
+        '闪避术': {
+            id: 'dodge_technique',
+            name: '闪避术',
+            type: 'defense',
+            tier: '人阶',
+            power: 1.0,
+            cooldown: 4,
+            cost: 10,
+            description: '身法闪避，提高50%闪避率',
+            effect: 'dodge_boost',
+            value: 0.5,
+            requirements: { realm: '炼气期', level: 1 }
+        },
+        '金钟罩': {
+            id: 'golden_bell',
+            name: '金钟罩',
+            type: 'defense',
+            tier: '地阶',
+            power: 1.0,
+            cooldown: 8,
+            cost: 25,
+            description: '金钟罩护体，免疫一次攻击',
+            effect: 'immunity',
+            value: 1,
+            charges: 1,
+            requirements: { realm: '筑基期', level: 3 }
+        },
+
+        // === 辅助类技能 ===
+        '聚气': {
+            id: 'gather_qi',
+            name: '聚气',
+            type: 'buff',
+            tier: '人阶',
+            power: 1.0,
+            cooldown: 6,
+            cost: 10,
+            description: '聚气凝神，下回合攻击翻倍',
+            effect: 'next_attack_boost',
+            value: 1.0,
+            requirements: { realm: '炼气期', level: 1 }
+        },
+        '破防': {
+            id: 'break_defense',
+            name: '破防',
+            type: 'debuff',
+            tier: '人阶',
+            power: 1.0,
+            cooldown: 5,
+            cost: 12,
+            description: '寻找破绽，降低敌人30%防御',
+            effect: 'enemy_defense_reduction',
+            value: 0.3,
+            requirements: { realm: '炼气期', level: 2 }
+        },
+        '狂暴': {
+            id: 'berserk',
+            name: '狂暴',
+            type: 'buff',
+            tier: '地阶',
+            power: 1.0,
+            cooldown: 8,
+            cost: 30,
+            description: '进入狂暴状态，攻击+50%，防御-30%，持续3回合',
+            effect: 'attack_defense_tradeoff',
+            value: { attack: 0.5, defense: -0.3 },
+            duration: 3,
+            requirements: { realm: '筑基期', level: 5 }
+        }
+    },
+
     // 宠物配置
     pets: {
         '灵猫': {
@@ -1726,6 +1868,11 @@ class GameState {
             accessory: null,
             special: null
         };
+
+        // 战斗技能
+        this.combatSkills = characterData?.combatSkills || {}; // 学会的战斗技能
+        this.activeCombatSkill = null; // 当前激活的战斗技能
+        this.combatSkillCooldowns = characterData?.combatSkillCooldowns || {}; // 技能冷却时间
 
         // 成就
         this.achievements = characterData?.achievements || [];
@@ -3310,6 +3457,90 @@ class GameState {
         this.currentPet = petName;
         this.addLog(`出战${petName}`, 'info');
         return { success: true, message: `出战${petName}` };
+    }
+
+    // 学习战斗技能
+    learnCombatSkill(skillId) {
+        const skill = CONFIG.combatSkills[skillId];
+        if (!skill) {
+            return { success: false, message: '技能不存在' };
+        }
+
+        // 检查是否已学会
+        if (this.combatSkills[skillId]) {
+            return { success: false, message: '已学会此技能' };
+        }
+
+        // 检查要求
+        if (skill.requirements.realm) {
+            const realmNames = Object.keys(CONFIG.realms);
+            const currentRealmIndex = realmNames.indexOf(this.realm);
+            const requiredRealmIndex = realmNames.indexOf(skill.requirements.realm);
+
+            if (currentRealmIndex < requiredRealmIndex) {
+                return { success: false, message: `境界不足，需要${skill.requirements.realm}` };
+            }
+
+            if (currentRealmIndex === requiredRealmIndex && this.level < skill.requirements.level) {
+                return { success: false, message: `层级不足，需要${skill.requirements.realm}${skill.requirements.level}层` };
+            }
+        }
+
+        // 学习技能
+        this.combatSkills[skillId] = {
+            learned: true,
+            timesUsed: 0,
+            highestDamage: 0
+        };
+
+        this.addLog(`学会了战斗技能：${skill.name}！`, 'legendary');
+        return { success: true, message: `学会${skill.name}` };
+    }
+
+    // 检查技能冷却
+    canUseSkill(skillId) {
+        const skill = CONFIG.combatSkills[skillId];
+        if (!skill || !this.combatSkills[skillId]) {
+            return { can: false, message: '未学会此技能' };
+        }
+
+        // 检查冷却时间
+        if (this.combatSkillCooldowns[skillId]) {
+            const cooldownEnd = this.combatSkillCooldowns[skillId];
+            if (Date.now() < cooldownEnd) {
+                const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
+                return { can: false, message: `冷却中，还需${remainingTime}秒` };
+            }
+        }
+
+        return { can: true };
+    }
+
+    // 获取可用技能列表
+    getAvailableCombatSkills() {
+        const availableSkills = [];
+        const realmIndex = Object.keys(CONFIG.realms).indexOf(this.realm);
+
+        for (const [skillId, skill] of Object.entries(CONFIG.combatSkills)) {
+            // 检查是否已学会
+            if (!this.combatSkills[skillId]) {
+                // 检查是否可以学习
+                if (skill.requirements.realm) {
+                    const reqRealmIndex = Object.keys(CONFIG.realms).indexOf(skill.requirements.realm);
+                    if (realmIndex >= reqRealmIndex) {
+                        if (realmIndex === reqRealmIndex && this.level >= skill.requirements.level) {
+                            availableSkills.push({ id: skillId, skill, canLearn: true });
+                        } else if (realmIndex > reqRealmIndex) {
+                            availableSkills.push({ id: skillId, skill, canLearn: true });
+                        }
+                    }
+                } else {
+                    availableSkills.push({ id: skillId, skill, canLearn: true });
+                }
+            }
+        }
+
+        return availableSkills;
     }
 
     // 获取法宝
