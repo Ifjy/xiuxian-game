@@ -1929,6 +1929,242 @@ const ASCII_ART = {
                 '稀有物品': { affection: 10 }
             }
         }
+    },
+
+    // ==================== 剧情任务配置 ====================
+    storyQuests: {
+        // 第一章：初入仙途
+        'chapter1_start': {
+            id: 'chapter1_start',
+            chapter: 1,
+            name: '初入仙途',
+            description: '刚踏入修仙界的你，需要了解这个世界的规则',
+            type: 'main',
+            requirements: { realm: '炼气期', level: 1 },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '初次修炼',
+                    description: '尝试修炼，感受灵气在体内流动',
+                    objective: { type: 'cultivate', target: 100 },
+                    rewards: [
+                        { type: 'spirit_stones', value: 50 },
+                        { type: 'item', value: '聚气丹', quantity: 2 }
+                    ],
+                    onComplete: {
+                        message: '你成功感受到了灵气的存在！这感觉真是奇妙。',
+                        unlocks: ['chapter1_stage2']
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '突破一层',
+                    description: '将修为提升到突破的临界点',
+                    objective: { type: 'breakthrough', target: 2 },
+                    rewards: [
+                        { type: 'spirit_stones', value: 100 },
+                        { type: 'cultivation', value: 50 }
+                    ],
+                    onComplete: {
+                        message: '成功突破到炼气期二层！你的修为有了明显提升。',
+                        unlocks: ['chapter1_stage3']
+                    }
+                },
+                {
+                    id: 'stage3',
+                    name: '第一次历练',
+                    description: '离开安全区，去外面的世界看看',
+                    objective: { type: 'adventure', target: 1 },
+                    rewards: [
+                        { type: 'item', value: '洗髓丹' },
+                        { type: 'spirit_stones', value: 150 }
+                    ],
+                    onComplete: {
+                        message: '历练归来，你对外面的世界有了更多了解。',
+                        unlocks: ['chapter1_stage4'],
+                        setFlag: { flag: 'completed_first_adventure', value: true }
+                    }
+                },
+                {
+                    id: 'stage4',
+                    name: '选择宗门',
+                    description: '是时候决定你的归属了',
+                    objective: { type: 'join_sect', target: 1 },
+                    rewards: [
+                        { type: 'spirit_stones', value: 200 },
+                        { type: 'item', value: '筑基丹', quantity: 1 }
+                    ],
+                    onComplete: {
+                        message: '恭喜！你已成为宗门一员，修仙之路正式开启！',
+                        unlocks: ['chapter2_start'],
+                        nextChapter: 2
+                    }
+                }
+            ]
+        },
+
+        // 第二章：宗门生涯
+        'chapter2_start': {
+            id: 'chapter2_start',
+            chapter: 2,
+            name: '宗门生涯',
+            description: '在宗门中努力修炼，争取早日筑基',
+            type: 'main',
+            requirements: { sect: 'any', realm: '炼气期', level: 3 },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '宗门贡献',
+                    description: '为宗门做出贡献，提升声望',
+                    objective: { type: 'sect_contribution', target: 100 },
+                    rewards: [
+                        { type: 'sect_contribution', value: 50 },
+                        { type: 'spirit_stones', value: 200 }
+                    ],
+                    onComplete: {
+                        message: '你在宗门的地位有所提升。',
+                        unlocks: ['chapter2_stage2']
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '内门考核',
+                    description: '通过内门弟子考核',
+                    objective: { type: 'sect_rank', target: '内门弟子' },
+                    rewards: [
+                        { type: 'skill', value: '基础剑法' },
+                        { type: 'item', value: '筑基丹', quantity: 2 }
+                    ],
+                    onComplete: {
+                        message: '成为内门弟子！你可以学习更高深的功法了。',
+                        unlocks: ['chapter2_stage3']
+                    }
+                },
+                {
+                    id: 'stage3',
+                    name: '筑基准备',
+                    description: '收集筑基所需的资源',
+                    objective: { type: 'collect_items', items: { '筑基丹': 1 } },
+                    rewards: [
+                        { type: 'item', value: '天劫符' },
+                        { type: 'cultivation', value: 200 }
+                    ],
+                    onComplete: {
+                        message: '筑基的准备已经完成，只待时机成熟！',
+                        unlocks: ['chapter2_stage4']
+                    }
+                },
+                {
+                    id: 'stage4',
+                    name: '筑基天劫',
+                    description: '渡过筑基天劫，进入筑基期',
+                    objective: { type: 'tribulation', target: '筑基期' },
+                    rewards: [
+                        { type: 'artifact', value: '青霜剑' },
+                        { type: 'spirit_stones', value: 1000 }
+                    ],
+                    onComplete: {
+                        message: '恭喜！你成功筑基，踏入修仙界的更高层次！',
+                        unlocks: ['chapter3_start'],
+                        nextChapter: 3
+                    }
+                }
+            ]
+        },
+
+        // 支线任务：身世之谜
+        'side_mystery': {
+            id: 'side_mystery',
+            chapter: 0,
+            name: '身世之谜',
+            description: '探索你的身世，寻找真相',
+            type: 'side',
+            requirements: { realm: '炼气期', level: 5, flag: 'completed_first_adventure' },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '神秘信物',
+                    description: '检查随身物品，发现一个古老的玉佩',
+                    objective: { type: 'check_inventory', trigger: 0.3 }, // 30%概率在历练时触发
+                    rewards: [
+                        { type: 'item', value: '神秘玉佩' }
+                    ],
+                    onComplete: {
+                        message: '你在一次历练中发现了自己随身携带的神秘玉佩，上面刻着奇异的符文。',
+                        unlocks: ['side_mystery_stage2'],
+                        setFlag: { flag: 'found_mysterious_jade', value: true }
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '寻找线索',
+                    description: '询问NPC关于玉佩的信息',
+                    objective: { type: 'npc_dialog', npc: 'mysterious_taoist', dialog: 'jade_inquiry' },
+                    rewards: [
+                        { type: 'cultivation', value: 100 },
+                        { type: 'info', value: '玉佩来自上古修仙家族' }
+                    ],
+                    onComplete: {
+                        message: '神秘道人告诉你，这玉佩来自一个早已消失的上古修仙家族。',
+                        unlocks: ['side_mystery_stage3']
+                    }
+                },
+                {
+                    id: 'stage3',
+                    name: '探索遗迹',
+                    description: '前往玉佩指示的地点',
+                    objective: { type: 'explore_realm', realm: 'ancient_ruins' },
+                    rewards: [
+                        { type: 'item', value: '家族传承功法' },
+                        { type: 'spirit_stones', value: 500 }
+                    ],
+                    onComplete: {
+                        message: '在遗迹中，你发现了家族的传承功法！原来你是上古修仙家族的后裔！',
+                        setFlag: { flag: 'discovered_heritage', value: true }
+                    }
+                }
+            ]
+        },
+
+        // 支线任务：宗门荣耀
+        'side_sect_glory': {
+            id: 'side_sect_glory',
+            chapter: 0,
+            name: '宗门荣耀',
+            description: '为宗门争光，提升宗门声望',
+            type: 'side',
+            requirements: { sect: 'any', realm: '筑基期' },
+            stages: [
+                {
+                    id: 'stage1',
+                    name: '宗门大比',
+                    description: '参加宗门大比，展示实力',
+                    objective: { type: 'defeat_monsters', count: 10, minRealm: '筑基期' },
+                    rewards: [
+                        { type: 'sect_reputation', value: 50 },
+                        { type: 'spirit_stones', value: 300 }
+                    ],
+                    onComplete: {
+                        message: '你在宗门大比中表现出色，为宗门赢得了荣誉！',
+                        unlocks: ['side_sect_glory_stage2']
+                    }
+                },
+                {
+                    id: 'stage2',
+                    name: '宗门战争',
+                    description: '参与宗门战争，击退敌对宗门',
+                    objective: { type: 'sect_war', victory: true },
+                    rewards: [
+                        { type: 'sect_reputation', value: 100 },
+                        { type: 'artifact', value: '宗门令牌' }
+                    ],
+                    onComplete: {
+                        message: '你成功击退敌对宗门，成为宗门的英雄！',
+                        setFlag: { flag: 'sect_hero', value: true }
+                    }
+                }
+            ]
+        }
     }
 };
 
@@ -2022,6 +2258,12 @@ class GameState {
         this.npcAffection = characterData?.npcAffection || {}; // NPC好感度 {npcId: value}
         this.npcHistory = characterData?.npcHistory || {}; // NPC对话历史 {npcId: [dialogIds]}
         this.unlockedNPCs = characterData?.unlockedNPCs || ['mysterious_taoist', 'merchant']; // 已解锁的NPC列表
+
+        // 剧情任务系统
+        this.questProgress = characterData?.questProgress || {}; // 任务进度 {questId: progress}
+        this.completedQuests = characterData?.completedQuests || []; // 已完成任务列表
+        this.currentChapter = characterData?.currentChapter || 1; // 当前章节（1-9）
+        this.storyFlags = characterData?.storyFlags || {}; // 剧情标记 {flag: value}
 
         // 成就
         this.achievements = characterData?.achievements || [];
