@@ -1004,6 +1004,274 @@ body {
     border: 1px dashed var(--border-color);
 }
 
+/* NPC系统样式 */
+.npc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.npc-list-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-text {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.empty-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.npc-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.npc-card:hover {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 0, 0.05);
+    transform: translateX(5px);
+}
+
+.npc-avatar {
+    font-size: 40px;
+    flex-shrink: 0;
+}
+
+.npc-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.npc-name {
+    color: var(--accent-color);
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.npc-title {
+    color: var(--rare-color);
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.npc-description {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.npc-affection {
+    color: var(--warning-color);
+    font-size: 11px;
+}
+
+/* NPC对话界面 */
+.npc-dialog-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.npc-dialog-header {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: var(--bg-color);
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.npc-dialog-avatar {
+    font-size: 50px;
+    flex-shrink: 0;
+}
+
+.npc-dialog-info {
+    flex: 1;
+}
+
+.npc-dialog-name {
+    color: var(--accent-color);
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.npc-dialog-title {
+    color: var(--rare-color);
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.npc-dialog-affection {
+    color: var(--warning-color);
+    font-size: 12px;
+}
+
+.npc-dialog-content {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+}
+
+.npc-dialog-text {
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.npc-dialog-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dialog-option {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.dialog-option:hover {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 0, 0.05);
+}
+
+.dialog-option.dialog-end {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.npc-dialog-actions {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+}
+
+.npc-actions-title {
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.npc-actions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.npc-action-btn {
+    background: var(--panel-bg);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.npc-action-btn:hover {
+    background: var(--accent-color);
+    color: var(--bg-color);
+}
+
+/* 赠送礼物界面 */
+.gift-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.gift-target {
+    text-align: center;
+    color: var(--accent-color);
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+}
+
+.gift-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gift-item {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gift-item:hover {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 0, 0.05);
+}
+
+.gift-item-name {
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.gift-item-effect {
+    color: var(--success-color);
+    font-size: 12px;
+}
+
+.empty-gifts {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 30px;
+    background: var(--bg-color);
+    border: 1px dashed var(--border-color);
+}
+
+.gift-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.gift-back-btn {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 13px;
+}
+
+.gift-back-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
 /* 响应式设计 */
 @media (max-width: 1024px) {
     .main-content {

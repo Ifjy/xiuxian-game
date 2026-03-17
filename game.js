@@ -1785,7 +1785,151 @@ const ASCII_ART = {
 ╱ ╱
  ╱
 ▼
-    `
+    `,
+
+    // ==================== NPC配置 ====================
+    npcs: {
+        'sect_elder': {
+            id: 'sect_elder',
+            name: '宗门长老',
+            title: '青云宗长老',
+            description: '负责管理宗门事务的威严长者',
+            avatar: '👴',
+            location: 'sect',
+            requirements: { sect: 'qingyun_sect', sectRank: '外门弟子' },
+            dialogs: {
+                'greeting': {
+                    text: '年轻人，看你骨骼精奇，是个修仙的好苗子。在宗门好好修炼，莫要辜负了你的天赋。',
+                    options: [
+                        { text: '请长老指点', next: 'teachings' },
+                        { text: '我想了解更多关于宗门', next: 'about_sect' },
+                        { text: '告辞', next: null }
+                    ]
+                },
+                'teachings': {
+                    text: '修仙之路，贵在坚持。炼气期打好基础，筑基期稳固根基，金丹期凝结元婴，方能踏上大道。',
+                    options: [
+                        { text: '受教了', next: null },
+                        { text: '还有其他建议吗？', next: 'advice' }
+                    ]
+                },
+                'advice': {
+                    text: '多历练、多参悟。切勿急功近利，否则容易走火入魔。另外，与宗门同仁搞好关系，对你的修行大有裨益。',
+                    options: [
+                        { text: '明白了', next: null }
+                    ]
+                },
+                'about_sect': {
+                    text: '我青云宗乃是方圆千里内的大宗，历史悠久，强者如云。只要你努力修炼，提升声望，宗门自会给你更多资源。',
+                    options: [
+                        { text: '我会努力的', next: null }
+                    ]
+                }
+            },
+            actions: [
+                { type: 'give_gift', description: '赠送礼物（提升好感度）' },
+                { type: 'request_guidance', description: '请求指点（提升修炼速度）' },
+                { type: 'sect_mission', description: '领取宗门任务' }
+            ],
+            gifts: {
+                '聚气丹': { affection: 5 },
+                '筑基丹': { affection: 20 },
+                '灵石': { affection: 0.01 } // 每个灵石+0.01好感度
+            }
+        },
+        'mysterious_taoist': {
+            id: 'mysterious_taoist',
+            name: '神秘道人',
+            title: '云游四方的修仙者',
+            description: '一身灰袍，来去无踪，似乎知道许多秘密',
+            avatar: '🧙',
+            location: 'adventure',
+            requirements: { realm: '炼气期', level: 5 },
+            dialogs: {
+                'greeting': {
+                    text: '呵呵，年轻人，你我相遇即是缘分。看你气息不凡，想必不是池中之物。',
+                    options: [
+                        { text: '前辈过奖了', next: 'humble' },
+                        { text: '您是何人？', next: 'identity' },
+                        { text: '告辞', next: null }
+                    ]
+                },
+                'humble': {
+                    text: '不必过谦。修仙界实力为尊，只要你足够强大，就有资格骄傲。',
+                    options: [
+                        { text: '请教前辈修行之法', next: 'teach_secret' }
+                    ]
+                },
+                'identity': {
+                    text: '我不过是一介闲云野鹤，云游四海罢了。倒是有些秘闻，不知你是否有兴趣听闻？',
+                    options: [
+                        { text: '愿闻其详', next: 'secret_rumor' },
+                        { text: '以后再说', next: null }
+                    ]
+                },
+                'teach_secret': {
+                    text: '修行无捷径，唯有坚持二字。不过...若你能在历练中遇到机缘，或许能得偿所愿。',
+                    options: [
+                        { text: '多谢前辈指点', next: null, effect: { type: 'buff', value: 'cultivation', duration: 300000 } }
+                    ]
+                },
+                'secret_rumor': {
+                    text: '听说...在东边深山之中，有一处古修洞府，藏有上古宝物。但那里也是妖兽聚集之地，凶险异常。',
+                    options: [
+                        { text: '多谢前辈告知', next: null, effect: { type: 'unlock_location', value: 'ancient_cave' } }
+                    ]
+                }
+            },
+            actions: [
+                { type: 'give_gift', description: '赠送礼物' },
+                { type: 'buy_info', description: '购买情报（需灵石）' }
+            ],
+            gifts: {
+                '灵石': { affection: 0.02 },
+                '洗髓丹': { affection: 15 }
+            }
+        },
+        'merchant': {
+            id: 'merchant',
+            name: '坊市商人',
+            title: '万宝楼掌柜',
+            description: '精明的商人，似乎什么都能买到',
+            avatar: '🧔',
+            location: 'market',
+            requirements: { spiritStones: 100 },
+            dialogs: {
+                'greeting': {
+                    text: '客官，欢迎光临万宝楼！本店丹药、法宝、功法应有尽有，您想看点什么？',
+                    options: [
+                        { text: '看看有什么好东西', next: 'show_items' },
+                        { text: '打听行情', next: 'market_info' },
+                        { text: '只是路过', next: null }
+                    ]
+                },
+                'show_items': {
+                    text: '今日新到了一批聚气丹，效果不俗。另外还有几件不错的法宝，您有需要吗？',
+                    options: [
+                        { text: '购买聚气丹', action: 'buy_item', item: '聚气丹' },
+                        { text: '下次再来', next: null }
+                    ]
+                },
+                'market_info': {
+                    text: '最近坊市里灵石行情看涨，听闻大宗门都在收购灵石储备物资。若是手头宽裕，多囤些丹药总是没错的。',
+                    options: [
+                        { text: '多谢告知', next: null }
+                    ]
+                }
+            },
+            actions: [
+                { type: 'trade', description: '交易物品' },
+                { type: 'give_gift', description: '赠送礼物' }
+            ],
+            gifts: {
+                '灵石': { affection: 0.05 },
+                '稀有物品': { affection: 10 }
+            }
+        }
+    }
 };
 
 // ==================== 游戏状态 ====================
@@ -1873,6 +2017,11 @@ class GameState {
         this.combatSkills = characterData?.combatSkills || {}; // 学会的战斗技能
         this.activeCombatSkill = null; // 当前激活的战斗技能
         this.combatSkillCooldowns = characterData?.combatSkillCooldowns || {}; // 技能冷却时间
+
+        // NPC系统
+        this.npcAffection = characterData?.npcAffection || {}; // NPC好感度 {npcId: value}
+        this.npcHistory = characterData?.npcHistory || {}; // NPC对话历史 {npcId: [dialogIds]}
+        this.unlockedNPCs = characterData?.unlockedNPCs || ['mysterious_taoist', 'merchant']; // 已解锁的NPC列表
 
         // 成就
         this.achievements = characterData?.achievements || [];
@@ -1974,6 +2123,141 @@ class GameState {
                 }
             }
         }
+    }
+
+    // ==================== NPC系统 ====================
+
+    // 获取可用的NPC列表
+    getAvailableNPCs() {
+        const available = [];
+        for (const npcId of this.unlockedNPCs) {
+            const npc = CONFIG.npcs[npcId];
+            if (!npc) continue;
+
+            // 检查NPC要求
+            let canAccess = true;
+            if (npc.requirements) {
+                if (npc.requirements.sect && this.sect !== npc.requirements.sect) {
+                    canAccess = false;
+                }
+                if (npc.requirements.sectRank) {
+                    const rankOrder = ['外门弟子', '内门弟子', '核心弟子', '真传弟子', '长老'];
+                    const playerRankIndex = rankOrder.indexOf(this.sectRank);
+                    const requiredRankIndex = rankOrder.indexOf(npc.requirements.sectRank);
+                    if (playerRankIndex < requiredRankIndex) {
+                        canAccess = false;
+                    }
+                }
+                if (npc.requirements.realm) {
+                    const realmNames = Object.keys(CONFIG.realms);
+                    const currentRealmIndex = realmNames.indexOf(this.realm);
+                    const requiredRealmIndex = realmNames.indexOf(npc.requirements.realm);
+                    if (currentRealmIndex < requiredRealmIndex) {
+                        canAccess = false;
+                    }
+                }
+                if (npc.requirements.spiritStones && this.spiritStones < npc.requirements.spiritStones) {
+                    canAccess = false;
+                }
+            }
+
+            if (canAccess) {
+                available.push(npc);
+            }
+        }
+        return available;
+    }
+
+    // 获取NPC好感度
+    getNPCAffection(npcId) {
+        return this.npcAffection[npcId] || 0;
+    }
+
+    // 增加NPC好感度
+    addNPCAffection(npcId, amount) {
+        if (!this.npcAffection[npcId]) {
+            this.npcAffection[npcId] = 0;
+        }
+        this.npcAffection[npcId] += amount;
+
+        // 好感度等级
+        const oldLevel = this.getAffectionLevel(this.npcAffection[npcId] - amount);
+        const newLevel = this.getAffectionLevel(this.npcAffection[npcId]);
+
+        if (newLevel > oldLevel) {
+            const npc = CONFIG.npcs[npcId];
+            this.addLog(`${npc.name}对你的好感度提升了！达到${newLevel}`, 'rare');
+        }
+
+        return this.npcAffection[npcId];
+    }
+
+    // 获取好感度等级
+    getAffectionLevel(affection) {
+        if (affection >= 100) return '知己';
+        if (affection >= 50) return '好友';
+        if (affection >= 20) return '熟悉';
+        if (affection >= 5) return '认识';
+        return '陌生人';
+    }
+
+    // 记录对话历史
+    recordNPCDialog(npcId, dialogId) {
+        if (!this.npcHistory[npcId]) {
+            this.npcHistory[npcId] = [];
+        }
+        if (!this.npcHistory[npcId].includes(dialogId)) {
+            this.npcHistory[npcId].push(dialogId);
+        }
+    }
+
+    // 检查是否已完成某个对话
+    hasCompletedDialog(npcId, dialogId) {
+        return this.npcHistory[npcId]?.includes(dialogId) || false;
+    }
+
+    // 解锁NPC
+    unlockNPC(npcId) {
+        if (!this.unlockedNPCs.includes(npcId)) {
+            this.unlockedNPCs.push(npcId);
+            const npc = CONFIG.npcs[npcId];
+            if (npc) {
+                this.addLog(`发现了新人物：${npc.name}！`, 'rare');
+            }
+        }
+    }
+
+    // 赠送礼物给NPC
+    giveGiftToNPC(npcId, itemName, amount = 1) {
+        const npc = CONFIG.npcs[npcId];
+        if (!npc) {
+            return { success: false, message: 'NPC不存在' };
+        }
+
+        if (!npc.gifts || !npc.gifts[itemName]) {
+            return { success: false, message: `${npc.name}不接受这个礼物` };
+        }
+
+        // 检查物品数量
+        if ((this.inventory[itemName] || 0) < amount) {
+            return { success: false, message: `物品不足` };
+        }
+
+        // 消耗物品
+        this.inventory[itemName] -= amount;
+        if (this.inventory[itemName] <= 0) {
+            delete this.inventory[itemName];
+        }
+
+        // 增加好感度
+        const affectionGain = npc.gifts[itemName].affection * amount;
+        const newAffection = this.addNPCAffection(npcId, affectionGain);
+
+        return {
+            success: true,
+            message: `你送给${npc.name}${amount}个${itemName}，好感度+${affectionGain.toFixed(1)}`,
+            newAffection: newAffection
+        };
     }
 
     // 计算当前层级的修炼需求
@@ -4254,6 +4538,19 @@ class GameUI {
                 }
             });
 
+            const npcBtn = document.getElementById('npcBtn');
+            if (npcBtn) {
+                npcBtn.addEventListener('click', () => {
+                    try {
+                        this.showNPCListModal();
+                    } catch (e) {
+                        console.error('显示NPC列表出错:', e);
+                        this.state.addLog('NPC列表打开失败：' + e.message, 'danger');
+                        this.updateLogs();
+                    }
+                });
+            }
+
             document.getElementById('artifactBtn').addEventListener('click', () => {
                 try {
                     this.showArtifactBag();
@@ -5236,6 +5533,331 @@ class GameUI {
         setTimeout(() => {
             this.processTribulation();
         }, 2000); // 每2秒一波
+    }
+
+    // ==================== NPC对话系统 ====================
+
+    // 显示NPC列表
+    showNPCListModal() {
+        const modal = document.getElementById('gameModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalHeader = document.getElementById('modalHeader');
+
+        modalHeader.querySelector('pre').textContent = '┌─── N P C 列 表 ───┐';
+
+        const availableNPCs = this.state.getAvailableNPCs();
+
+        if (availableNPCs.length === 0) {
+            modalBody.innerHTML = `
+                <div class="npc-list-empty">
+                    <div class="empty-text">暂无可用NPC</div>
+                    <div class="empty-hint">提升境界或加入宗门可解锁更多NPC</div>
+                </div>
+            `;
+        } else {
+            let html = '<div class="npc-list">';
+
+            availableNPCs.forEach(npc => {
+                const affection = this.state.getNPCAffection(npc.id);
+                const affectionLevel = this.state.getAffectionLevel(affection);
+
+                html += `
+                    <div class="npc-card" data-npc="${npc.id}">
+                        <div class="npc-avatar">${npc.avatar}</div>
+                        <div class="npc-info">
+                            <div class="npc-name">${npc.name}</div>
+                            <div class="npc-title">${npc.title}</div>
+                            <div class="npc-description">${npc.description}</div>
+                            <div class="npc-affection">好感度：${affection.toFixed(1)} (${affectionLevel})</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            modalBody.innerHTML = html;
+
+            // 添加NPC点击事件
+            modalBody.querySelectorAll('.npc-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const npcId = card.getAttribute('data-npc');
+                    this.showNPCDialogModal(npcId);
+                });
+            });
+        }
+
+        modal.classList.add('active');
+    }
+
+    // 显示NPC对话界面
+    showNPCDialogModal(npcId, dialogId = 'greeting') {
+        const modal = document.getElementById('gameModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalHeader = document.getElementById('modalHeader');
+
+        const npc = CONFIG.npcs[npcId];
+        if (!npc) {
+            alert('NPC不存在');
+            return;
+        }
+
+        const dialog = npc.dialogs[dialogId];
+        if (!dialog) {
+            alert('对话不存在');
+            return;
+        }
+
+        // 记录对话历史
+        this.state.recordNPCDialog(npcId, dialogId);
+
+        modalHeader.querySelector('pre').textContent = `┌─── ${npc.name} ───┐`;
+
+        const affection = this.state.getNPCAffection(npcId);
+        const affectionLevel = this.state.getAffectionLevel(affection);
+
+        let html = `
+            <div class="npc-dialog-container">
+                <div class="npc-dialog-header">
+                    <div class="npc-dialog-avatar">${npc.avatar}</div>
+                    <div class="npc-dialog-info">
+                        <div class="npc-dialog-name">${npc.name}</div>
+                        <div class="npc-dialog-title">${npc.title}</div>
+                        <div class="npc-dialog-affection">好感度：${affection.toFixed(1)} (${affectionLevel})</div>
+                    </div>
+                </div>
+
+                <div class="npc-dialog-content">
+                    <div class="npc-dialog-text">${dialog.text}</div>
+                </div>
+
+                <div class="npc-dialog-options">
+        `;
+
+        // 添加对话选项
+        if (dialog.options && dialog.options.length > 0) {
+            dialog.options.forEach((option, index) => {
+                html += `
+                    <div class="dialog-option" data-option="${index}" data-next="${option.next || ''}" data-action="${option.action || ''}">
+                        ${index + 1}. ${option.text}
+                    </div>
+                `;
+            });
+        } else {
+            html += `<div class="dialog-option dialog-end" data-close="true">结束对话</div>`;
+        }
+
+        html += `
+                </div>
+
+                <div class="npc-dialog-actions">
+                    <div class="npc-actions-title">
+                        可用操作：
+                    </div>
+                    <div class="npc-actions-list">
+        `;
+
+        // 添加NPC操作按钮
+        if (npc.actions && npc.actions.length > 0) {
+            npc.actions.forEach(action => {
+                html += `<div class="npc-action-btn" data-action="${action.type}">${action.description}</div>`;
+            });
+        }
+
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modalBody.innerHTML = html;
+
+        // 绑定对话选项事件
+        modalBody.querySelectorAll('.dialog-option:not(.dialog-end)').forEach(option => {
+            option.addEventListener('click', () => {
+                const nextDialogId = option.getAttribute('data-next');
+                const actionType = option.getAttribute('data-action');
+                const optionData = dialog.options[parseInt(option.getAttribute('data-option'))];
+
+                // 处理选项效果
+                if (optionData && optionData.effect) {
+                    this.applyDialogEffect(optionData.effect);
+                }
+
+                // 处理动作
+                if (actionType) {
+                    this.handleNPCAction(npcId, actionType, optionData);
+                } else if (nextDialogId) {
+                    // 继续对话
+                    this.showNPCDialogModal(npcId, nextDialogId);
+                } else {
+                    // 结束对话
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // 绑定结束对话事件
+        const endOption = modalBody.querySelector('.dialog-option.dialog-end');
+        if (endOption) {
+            endOption.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+        }
+
+        // 绑定操作按钮事件
+        modalBody.querySelectorAll('.npc-action-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const actionType = btn.getAttribute('data-action');
+                this.handleNPCAction(npcId, actionType);
+            });
+        });
+
+        modal.classList.add('active');
+    }
+
+    // 应用对话效果
+    applyDialogEffect(effect) {
+        if (!effect) return;
+
+        switch (effect.type) {
+            case 'buff':
+                if (effect.value === 'cultivation') {
+                    this.state.buffs.cultivation.multiplier = 1.5;
+                    this.state.buffs.cultivation.endTime = Date.now() + (effect.duration || 300000);
+                    this.state.addLog('修炼速度提升50%，持续5分钟', 'success');
+                }
+                break;
+            case 'unlock_location':
+                // 解锁新位置（可以与秘境系统关联）
+                this.state.addLog(`发现了新地点：${effect.value}`, 'rare');
+                break;
+        }
+    }
+
+    // 处理NPC操作
+    handleNPCAction(npcId, actionType, optionData = null) {
+        const npc = CONFIG.npcs[npcId];
+        if (!npc) return;
+
+        switch (actionType) {
+            case 'give_gift':
+                this.showNPCCiftModal(npcId);
+                break;
+            case 'buy_info':
+                // 购买情报逻辑
+                if (this.state.spiritStones >= 100) {
+                    this.state.spiritStones -= 100;
+                    this.state.addLog('花费100灵石购买了情报', 'info');
+                    // 可以显示一些游戏提示或秘籍
+                } else {
+                    alert('灵石不足');
+                }
+                break;
+            case 'request_guidance':
+                // 请求指点，提升修炼速度
+                const affection = this.state.getNPCAffection(npcId);
+                if (affection >= 20) {
+                    this.state.buffs.cultivation.multiplier = 1.3;
+                    this.state.buffs.cultivation.endTime = Date.now() + 600000;
+                    this.state.addLog(`${npc.name}指点你修炼，修炼速度提升30%，持续10分钟`, 'success');
+                    document.getElementById('gameModal').classList.remove('active');
+                } else {
+                    alert('好感度不足，需要达到"熟悉"（20点）');
+                }
+                break;
+            case 'sect_mission':
+                document.getElementById('gameModal').classList.remove('active');
+                // 跳转到宗门任务标签
+                setTimeout(() => this.showSectModal(), 100);
+                break;
+            case 'trade':
+                // 交易逻辑（可以与商店系统关联）
+                this.state.addLog('与商人交易', 'info');
+                break;
+            case 'buy_item':
+                if (optionData && optionData.item) {
+                    // 购买物品逻辑
+                    this.state.addLog(`购买${optionData.item}`, 'info');
+                }
+                break;
+        }
+    }
+
+    // 显示赠送礼物界面
+    showNPCCiftModal(npcId) {
+        const npc = CONFIG.npcs[npcId];
+        if (!npc) return;
+
+        const modal = document.getElementById('gameModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalHeader = document.getElementById('modalHeader');
+
+        modalHeader.querySelector('pre').textContent = `┌─── 赠送礼物 ───┐`;
+
+        let html = `
+            <div class="gift-container">
+                <div class="gift-target">送给：${npc.name} ${npc.avatar}</div>
+                <div class="gift-items-list">
+        `;
+
+        // 显示可赠送的物品
+        const giftableItems = Object.keys(npc.gifts || {});
+        let hasItems = false;
+
+        for (const itemName of giftableItems) {
+            const quantity = this.state.inventory[itemName] || 0;
+            if (quantity > 0) {
+                hasItems = true;
+                const affectionGain = npc.gifts[itemName].affection * quantity;
+                html += `
+                    <div class="gift-item" data-item="${itemName}">
+                        <div class="gift-item-name">${itemName} × ${quantity}</div>
+                        <div class="gift-item-effect">好感度 +${affectionGain.toFixed(1)}</div>
+                    </div>
+                `;
+            }
+        }
+
+        if (!hasItems) {
+            html += `<div class="empty-gifts">没有可赠送的物品</div>`;
+        }
+
+        html += `
+                </div>
+                <div class="gift-actions">
+                    <div class="gift-back-btn" data-back-to-npc="${npcId}">返回对话</div>
+                </div>
+            </div>
+        `;
+
+        modalBody.innerHTML = html;
+
+        // 绑定赠送事件
+        modalBody.querySelectorAll('.gift-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const itemName = item.getAttribute('data-item');
+                const result = this.state.giveGiftToNPC(npcId, itemName);
+                if (result.success) {
+                    this.state.addLog(result.message, 'success');
+                    this.updateDisplay();
+                    // 刷新界面
+                    this.showNPCCiftModal(npcId);
+                } else {
+                    alert(result.message);
+                }
+            });
+        });
+
+        // 绑定返回事件
+        const backBtn = modalBody.querySelector('.gift-back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                const targetNpcId = backBtn.getAttribute('data-back-to-npc');
+                this.showNPCDialogModal(targetNpcId);
+            });
+        }
+
+        modal.classList.add('active');
     }
 
     // 显示战斗界面
