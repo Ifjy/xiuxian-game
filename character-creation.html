@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字修仙 - 存档管理</title>
+    <link rel="stylesheet" href="creation-style.css">
+</head>
+<body>
+    <div class="creation-container">
+        <!-- 游戏标题 -->
+        <div class="game-header">
+            <pre class="ascii-title">
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║                     ╔═══╗ ╔═══╗ ╔═══╗ ╔═══╗                              ║
+║                     ║   ║ ║   ║ ║   ║ ║   ║                              ║
+║                     ║   ║ ║   ║ ║   ║ ║   ║                              ║
+║                     ╚═══╝ ╚═══╝ ╚═══╝ ╚═══╝                              ║
+║                                                                           ║
+║                    【 文 字 修 仙 】                                      ║
+║                                                                           ║
+║              天地玄黄，宇宙洪荒，修仙之路，道阻且长                        ║
+║            你乃一介凡人，偶得仙缘，踏上修仙之路                            ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+            </pre>
+        </div>
+
+        <!-- 存档选择界面 -->
+        <div class="save-management" id="saveManagement">
+            <div class="management-header">
+                <pre>┌─── 存 档 管 理 ───┐</pre>
+            </div>
+
+            <div class="management-content">
+                <div class="save-slots" id="saveSlots">
+                    <!-- 存档槽位将由JavaScript动态生成 -->
+                </div>
+
+                <div class="management-actions">
+                    <button class="management-btn" id="createNewBtn">
+                        <pre>[ 创 建 新 角 色 ]</pre>
+                    </button>
+                </div>
+            </div>
+
+            <div class="management-footer">
+                <pre>└──────────────────────────────────────────────────────────────────┘</pre>
+            </div>
+        </div>
+
+        <!-- 角色创建表单 -->
+        <div class="character-form" id="characterForm" style="display: none;">
+            <div class="form-header">
+                <pre>┌─── 创 造 你 的 角 色 ───┐</pre>
+            </div>
+
+            <div class="form-content">
+                <!-- 基本信息 -->
+                <div class="form-section">
+                    <label>[ 姓名 ]</label>
+                    <input type="text" id="playerName" placeholder="输入你的名字" maxlength="8">
+                </div>
+
+                <div class="form-section">
+                    <label>[ 道号 ]</label>
+                    <input type="text" id="daoName" placeholder="选择你的道号" maxlength="10">
+                </div>
+
+                <div class="form-section">
+                    <label>[ 出身 ]</label>
+                    <select id="playerBackground">
+                        <option value="commoner">凡人 - 无特殊加成</option>
+                        <option value="noble">贵族子弟 - 初始灵石+1000，悟性+2</option>
+                        <option value="merchant">商贾之家 - 初始灵石+500，幸运+3</option>
+                        <option value="scholar">书香门第 - 悟性+5，根骨+2</option>
+                        <option value="farmer">农家子弟 - 根骨+5，机缘+1</option>
+                        <option value="warrior">武学世家 - 攻击+10，防御+5</option>
+                        <option value="orphan">孤儿 - 幸运+5，机缘+3</option>
+                    </select>
+                </div>
+
+                <!-- 天赋点分配 -->
+                <div class="talent-section">
+                    <div class="talent-header">
+                        <pre>┌─── 天 赋 点 分 配 (剩余点数: <span id="remainingPoints">20</span>) ───┐</pre>
+                    </div>
+
+                    <div class="talent-grid">
+                        <div class="talent-item">
+                            <label>[悟性]</label>
+                            <div class="talent-control">
+                                <button class="talent-btn" data-attribute="wisdom" data-action="-1">-</button>
+                                <span class="talent-value" id="wisdomValue">0</span>
+                                <button class="talent-btn" data-attribute="wisdom" data-action="+1">+</button>
+                            </div>
+                            <small>影响功法学习速度</small>
+                        </div>
+
+                        <div class="talent-item">
+                            <label>[幸运]</label>
+                            <div class="talent-control">
+                                <button class="talent-btn" data-attribute="luck" data-action="-1">-</button>
+                                <span class="talent-value" id="luckValue">0</span>
+                                <button class="talent-btn" data-attribute="luck" data-action="+1">+</button>
+                            </div>
+                            <small>影响事件触发和掉落</small>
+                        </div>
+
+                        <div class="talent-item">
+                            <label>[根骨]</label>
+                            <div class="talent-control">
+                                <button class="talent-btn" data-attribute="potential" data-action="-1">-</button>
+                                <span class="talent-value" id="potentialValue">0</span>
+                                <button class="talent-btn" data-attribute="potential" data-action="+1">+</button>
+                            </div>
+                            <small>影响修为上限和修炼速度</small>
+                        </div>
+
+                        <div class="talent-item">
+                            <label>[机缘]</label>
+                            <div class="talent-control">
+                                <button class="talent-btn" data-attribute="fortune" data-action="-1">-</button>
+                                <span class="talent-value" id="fortuneValue">0</span>
+                                <button class="talent-btn" data-attribute="fortune" data-action="+1">+</button>
+                            </div>
+                            <small>影响奇遇和特殊事件</small>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <pre>└───────────────────────────────────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 按钮组 -->
+                <div class="button-group">
+                    <button class="action-btn" id="startBtn">
+                        <pre>[ 开 始 修 仙 ]</pre>
+                    </button>
+                    <button class="action-btn secondary" id="backBtn">
+                        <pre>[ 返 回 ]</pre>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="character-creation.js"></script>
+</body>
+</html>

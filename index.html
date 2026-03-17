@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字修仙</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 顶部标题栏 -->
+        <div class="game-header">
+            <pre class="header-text">
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         【 文 字 修 仙 】                                  ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+            </pre>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <!-- 左侧面板 -->
+            <div class="left-panel">
+                <!-- 角色信息 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 角 色 信 息 ───┐</pre>
+                    </div>
+                    <div class="panel-content">
+                        <div class="info-row">
+                            <span class="info-label">[姓名]</span>
+                            <span class="info-value" id="playerNameDisplay">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">[道号]</span>
+                            <span class="info-value" id="daoNameDisplay">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">[境界]</span>
+                            <span class="info-value realm" id="currentRealm">炼气期 一层</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">[修为]</span>
+                            <span class="info-value">
+                                <span id="currentCultivation">0</span>/<span id="maxCultivation">100</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 基础属性 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 基 础 属 性 ───┐</pre>
+                    </div>
+                    <div class="panel-content">
+                        <div class="attribute-row">
+                            <span class="attr-label">[悟性]</span>
+                            <span class="attr-value" id="wisdomAttr">0</span>
+                        </div>
+                        <div class="attribute-row">
+                            <span class="attr-label">[幸运]</span>
+                            <span class="attr-value" id="luckAttr">0</span>
+                        </div>
+                        <div class="attribute-row">
+                            <span class="attr-label">[根骨]</span>
+                            <span class="attr-value" id="potentialAttr">0</span>
+                        </div>
+                        <div class="attribute-row">
+                            <span class="attr-label">[机缘]</span>
+                            <span class="attr-value" id="fortuneAttr">0</span>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 战斗属性 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 战 斗 属 性 ───┐</pre>
+                    </div>
+                    <div class="panel-content">
+                        <div class="combat-row">
+                            <span class="combat-label">[攻击]</span>
+                            <span class="combat-value" id="attackAttr">0</span>
+                        </div>
+                        <div class="combat-row">
+                            <span class="combat-label">[防御]</span>
+                            <span class="combat-value" id="defenseAttr">0</span>
+                        </div>
+                        <div class="combat-row">
+                            <span class="combat-label">[生命]</span>
+                            <span class="combat-value" id="healthAttr">100</span>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中央修炼区域 -->
+            <div class="center-panel">
+                <!-- 修炼小人 -->
+                <div class="cultivation-area">
+                    <pre id="asciiCultivator" class="ascii-cultivator"></pre>
+                </div>
+
+                <!-- 修为进度条 -->
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <pre>┌─── 修 炼 进 度 ───┐</pre>
+                    </div>
+                    <div class="progress-content">
+                        <pre id="cultivationBar" class="progress-bar">[░░░░░░░░░░░░░░░░░░░░░]</pre>
+                        <div class="progress-text">
+                            <span id="cultivationPercentage">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 当前状态显示 -->
+                <div class="status-display">
+                    <div class="status-header">
+                        <pre>┌─── 当 前 状 态 ───┐</pre>
+                    </div>
+                    <div class="status-content">
+                        <div class="status-text" id="currentStatus">[修炼中]</div>
+                        <div class="status-timer" id="statusTimer"></div>
+                    </div>
+                    <div class="status-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <button class="action-btn" id="breakthroughBtn">[突破]</button>
+                    <button class="action-btn" id="meditateBtn">[入定]</button>
+                    <button class="action-btn" id="adventureBtn">[历练]</button>
+                    <button class="action-btn" id="fightBtn">[战斗]</button>
+                    <button class="action-btn" id="workBtn">[打工]</button>
+                    <button class="action-btn" id="alchemyBtn">[炼丹]</button>
+                    <button class="action-btn" id="inventoryBtn">[背包]</button>
+                    <button class="action-btn" id="shopBtn">[商店]</button>
+                    <button class="action-btn" id="sectBtn">[宗门]</button>
+                    <button class="action-btn" id="artifactBtn">[法宝]</button>
+                    <button class="action-btn" id="explorationBtn">[秘境]</button>
+                    <button class="action-btn" id="saveMenuBtn">[存档]</button>
+                    <button class="action-btn" id="MainMenuBtn">[主菜单]</button>
+                </div>
+            </div>
+
+            <!-- 右侧面板 -->
+            <div class="right-panel">
+                <!-- 当前功法 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 当 前 功 法 ───┐</pre>
+                    </div>
+                    <div class="panel-content">
+                        <div class="skill-info" id="currentSkill">
+                            <div class="skill-name">基础吐纳法</div>
+                            <div class="skill-level">一层</div>
+                            <div class="skill-effect">修炼速度+10%</div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 已学功法 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 已 学 功 法 ───┐</pre>
+                    </div>
+                    <div class="panel-content skills-list" id="skillsList">
+                        <div class="skill-item">
+                            <span class="skill-name">基础吐纳法</span>
+                            <span class="skill-level">一层</span>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 当前宠物 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 当 前 宠 物 ───┐</pre>
+                    </div>
+                    <div class="panel-content pet-info" id="currentPet">
+                        <div class="pet-status">暂无宠物</div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 宠物列表 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 我 的 宠 物 ───┐</pre>
+                    </div>
+                    <div class="panel-content pets-list" id="petsList">
+                        <div class="empty-list">暂无宠物</div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+
+                <!-- 段位成就 -->
+                <div class="panel-section">
+                    <div class="panel-header">
+                        <pre>┌─── 段 位 成 就 ───┐</pre>
+                    </div>
+                    <div class="panel-content achievements-list" id="achievementsList">
+                        <div class="empty-list">暂无成就</div>
+                    </div>
+                    <div class="panel-footer">
+                        <pre>└────────────────────┘</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部日志区域 -->
+        <div class="bottom-panel">
+            <div class="log-header">
+                <pre>┌─── 修 炼 日 志 ───┐</pre>
+                <button class="clear-log-btn" id="clearLogBtn">[清空]</button>
+            </div>
+            <div class="log-content" id="logContent">
+                <div class="log-entry">开始你的修仙之路...</div>
+            </div>
+            <div class="log-footer">
+                <pre>└──────────────────────────────────────────────────────────┘</pre>
+            </div>
+        </div>
+
+        <!-- 资源状态栏 -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">[灵石]</span>
+                <span class="status-value" id="spiritStones">0</span>
+            </div>
+            <div class="status-divider">|</div>
+            <div class="status-item">
+                <span class="status-label">[修为/秒]</span>
+                <span class="status-value" id="cultivationRate">1.0</span>
+            </div>
+            <div class="status-divider">|</div>
+            <div class="status-item">
+                <span class="status-label">[修炼天数]</span>
+                <span class="status-value" id="totalDays">0</span>
+            </div>
+            <div class="status-divider">|</div>
+            <div class="status-item">
+                <span class="status-label">[宗门]</span>
+                <span class="status-value" id="sectName">无门无派</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">
+                <pre></pre>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer">
+                <button class="modal-close-btn" id="closeModalBtn">[关闭]</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
