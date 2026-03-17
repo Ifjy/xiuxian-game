@@ -211,6 +211,90 @@ GameState.reset()
 - **本地存储**：LocalStorage保存进度
 - **模块化设计**：清晰的代码结构
 
+## 💾 存档管理详解
+
+### ⚠️ 重要提示
+
+**游戏使用浏览器 localStorage 存档，请务必了解以下限制：**
+
+#### 存储位置
+- **存储类型**：浏览器本地存储（localStorage）
+- **存档文件**：
+  - `xiuxian_save_1`：存档槽位1
+  - `xiuxian_save_2`：存档槽位2
+  - `xiuxian_save_3`：存档槽位3
+- **存储位置**：浏览器用户数据目录
+
+#### 不同浏览器的存档位置
+
+**Windows系统：**
+- Chrome: `C:\Users\用户名\AppData\Local\Google\Chrome\User Data\Default\Local Storage`
+- Edge: `C:\Users\用户名\AppData\Local\Microsoft\Edge\User Data\Default\Local Storage`
+- Firefox: `C:\Users\用户名\AppData\Roaming\Mozilla\Firefox\Profiles\xxx\webappsstore.sqlite`
+
+**Mac系统：**
+- Chrome: `~/Library/Application Support/Google/Chrome/Default/Local Storage`
+- Firefox: `~/Library/Application Support/Firefox/Profiles/xxx`
+
+### ⚠️ 存档丢失风险
+
+1. **清除浏览器数据** → 所有存档丢失
+2. **卸载浏览器** → 存档可能丢失
+3. **使用隐私模式** → 存档不会保存
+4. **换设备/浏览器** → 存档不互通
+
+### ✅ 保护存档的方案
+
+#### 方案1：使用游戏内导出功能（推荐）
+
+1. 点击 **[存档]** 按钮
+2. 点击 **[导出所有存档]** 按钮
+3. 保存下载的 `.json` 文件
+4. 需要时点击 **[导入存档]** 恢复
+
+#### 方案2：手动备份localStorage
+
+1. 按 F12 打开开发者工具
+2. 进入 **Application** 标签
+3. 左侧找到 **Local Storage**
+4. 找到你的域名
+5. 复制所有 `xiuxian_save_*` 的值保存
+
+### 🌐 部署到服务器
+
+#### 当前方案的特点
+
+**优点：**
+- ✅ 无需后端服务器，部署简单
+- ✅ 可以托管到任何静态网站服务
+- ✅ 无服务器成本
+
+**缺点：**
+- ❌ 玩家存档存储在各自浏览器中
+- ❌ 换设备/浏览器会丢失存档
+- ❌ 无法实现跨设备同步
+
+#### 部署方式
+
+**1. GitHub Pages（免费）**
+```bash
+# 上传到GitHub，启用GitHub Pages
+# 访问：https://用户名.github.io/仓库名
+```
+
+**2. Vercel / Netlify（免费）**
+```bash
+# 注册账号，连接仓库或拖拽文件夹
+# 自动部署完成
+```
+
+**3. 自己的服务器**
+```bash
+# 使用Nginx/Apache托管静态文件即可
+```
+
+详细说明请查看：[SAVE_MANAGEMENT.md](SAVE_MANAGEMENT.md)
+
 ## 🎪 游戏理念
 
 这是一个"完整的慢游戏"，强调：
