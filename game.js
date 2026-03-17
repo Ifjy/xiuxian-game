@@ -469,9 +469,9 @@ const CONFIG = {
             price: 500
         },
         '灵石袋': {
-            description: '包含随机数量的灵石',
+            description: '包含随机数量的灵石（约80-200个）',
             effect: 'spirit_stones',
-            value: [100, 500],
+            value: [80, 200],
             duration: 0,
             rarity: 'common',
             price: 100
@@ -2285,6 +2285,8 @@ class GameState {
             this.applyBackgroundBonus();
             // 新角色自动学习第一个战斗技能
             this.learnInitialCombatSkill();
+            // 新角色获得初始法宝
+            this.giveInitialArtifact();
         }
     }
 
@@ -2335,6 +2337,28 @@ class GameState {
         if (result.success) {
             this.activeCombatSkill = initialSkillId;
             console.log('自动学会初始战斗技能:', result.message);
+        }
+    }
+
+    // 新角色获得初始法宝
+    giveInitialArtifact() {
+        // 给新角色一个铁剑作为初始武器
+        const initialArtifact = CONFIG.artifacts['铁剑'];
+        if (initialArtifact) {
+            const newArtifact = {
+                id: initialArtifact.id,
+                name: initialArtifact.name,
+                grade: initialArtifact.grade,
+                type: initialArtifact.type,
+                level: initialArtifact.level,
+                maxLevel: initialArtifact.maxLevel,
+                baseStats: { ...initialArtifact.baseStats },
+                specialEffect: initialArtifact.specialEffect,
+                description: initialArtifact.description,
+                requirements: { ...initialArtifact.requirements }
+            };
+            this.artifacts.push(newArtifact);
+            console.log('获得初始法宝:', newArtifact.name);
         }
     }
 
@@ -4215,7 +4239,8 @@ class GameState {
                 maxLevel: artifact.maxLevel,
                 baseStats: { ...artifact.baseStats },
                 specialEffect: artifact.specialEffect,
-                description: artifact.description
+                description: artifact.description,
+                requirements: { ...artifact.requirements } // 复制装备要求
             };
             this.artifacts.push(newArtifact);
             this.addLog(`获得了${artifact.grade}法宝：${artifact.name}！`, 'legendary');
