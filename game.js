@@ -2806,6 +2806,9 @@ class GameState {
             // 检查并学习新的战斗技能
             this.checkAndLearnCombatSkills();
 
+            // 更新任务进度
+            this.updateQuestProgress('breakthrough', this.level);
+
             return { success: true, message: '突破成功！' };
         } else {
             const failurePenalty = Math.floor(this.maxCultivation * 0.2);
@@ -2980,6 +2983,9 @@ class GameState {
         // amount 应该是每秒修为的基础值，不需要再次计算
         const oldCultivation = this.cultivation;
         this.cultivation = Math.floor(this.cultivation + amount);
+
+        // 更新任务进度
+        this.updateQuestProgress('cultivate', amount);
 
         // 先检查是否达到自动突破条件（在限制之前）
         if (oldCultivation < this.maxCultivation * 2 && this.cultivation >= this.maxCultivation * 2) {
@@ -3219,6 +3225,9 @@ class GameState {
         this.isAdventuring = false;
         this.currentAdventure = null;
         this.adventureEndTime = 0;
+
+        // 更新任务进度
+        this.updateQuestProgress('adventure', 1);
     }
 
     // 开始秘境探索
@@ -6100,6 +6109,280 @@ class GameUI {
         }
 
         modal.classList.add('active');
+    }
+
+    // ==================== 剧情任务系统 ====================
+
+    // 获取当前可用的任务列表
+    getAvailableQuests() {
+        const available = [];
+        for (const [questId, quest] of Object.entries(CONFIG.storyQuests)) {
+            if (this.completedQuests.includes(questId)) continue;
+            if (quest.requirements && !this.checkQuestRequirements(quest.requirements)) continue;
+            const currentStage = this.getCurrentQuestStage(questId);
+            if (!currentStage && !this.canStartQuest(questId)) continue;
+            available.push({ id: questId, ...quest, currentStage });
+        }
+        return available;
+    }
+
+    // 检查任务前置条件
+    checkQuestRequirements(requirements) {
+        if (requirements.realm) {
+            const realmNames = Object.keys(CONFIG.realms);
+            const currentRealmIndex = realmNames.indexOf(this.realm);
+            const requiredRealmIndex = realmNames.indexOf(requirements.realm);
+            if (currentRealmIndex < requiredRealmIndex) return false;
+            if (currentRealmIndex === requiredRealmIndex && this.level < requirements.level) return false;
+        }
+        if (requirements.sect && requirements.sect !== 'any' && this.sect !== requirements.sect) return false;
+        if (requirements.sect === 'any' && this.sect === 'none') return false;
+        if (requirements.flag && !this.storyFlags[requirements.flag]) return false;
+        return true;
+    }
+
+    // 检查是否可以开始任务
+    canStartQuest(questId) {
+        const quest = CONFIG.storyQuests[questId];
+        if (!quest) return false;
+        if (quest.type === 'main') return quest.chapter <= this.currentChapter;
+        return this.checkQuestRequirements(quest.requirements);
+    }
+
+    // 获取任务的当前阶段
+    getCurrentQuestStage(questId) {
+        if (this.questProgress[questId]) {
+            const stageId = this.questProgress[questId].currentStage;
+            const quest = CONFIG.storyQuests[questId];
+            return quest ? quest.stages.find(s => s.id === stageId) : null;
+        }
+        return null;
+    }
+
+    // 开始任务
+    startQuest(questId) {
+        const quest = CONFIG.storyQuests[questId];
+        if (!quest) return { success: false, message: '任务不存在' };
+        if (this.completedQuests.includes(questId)) return { success: false, message: '任务已完成' };
+        if (this.questProgress[questId]) return { success: false, message: '任务已进行中' };
+        if (!this.canStartQuest(questId)) return { success: false, message: '任务条件未满足' };
+
+        this.questProgress[questId] = {
+            currentStage: quest.stages[0].id,
+            progress: {},
+            startTime: Date.now()
+        };
+        this.addLog(`开始任务：${quest.name}`, 'rare');
+        return { success: true, message: `开始任务：${quest.name}` };
+    }
+
+    // 更新任务进度
+    updateQuestProgress(objectiveType, value) {
+        const updatedQuests = [];
+        for (const [questId, progress] of Object.entries(this.questProgress)) {
+            const quest = CONFIG.storyQuests[questId];
+            if (!quest) continue;
+            const currentStage = quest.stages.find(s => s.id === progress.currentStage);
+            if (!currentStage) continue;
+
+            const objective = currentStage.objective;
+            let progressed = false;
+
+            switch (objectiveType) {
+                case 'cultivate':
+                    if (objective.type === 'cultivate') {
+                        progress.progress.cultivated = (progress.progress.cultivated || 0) + value;
+                        progressed = true;
+                    }
+                    break;
+                case 'breakthrough':
+                    if (objective.type === 'breakthrough') {
+                        progress.progress.level = this.level;
+                        progressed = true;
+                    }
+                    break;
+                case 'adventure':
+                    if (objective.type === 'adventure') {
+                        progress.progress.adventures = (progress.progress.adventures || 0) + 1;
+                        progressed = true;
+                    }
+                    break;
+                case 'sect_contribution':
+                    if (objective.type === 'sect_contribution') {
+                        progress.progress.contribution = this.sectContribution;
+                        progressed = true;
+                    }
+                    break;
+                case 'sect_rank':
+                    if (objective.type === 'sect_rank') {
+                        progress.progress.rank = this.sectRank;
+                        progressed = true;
+                    }
+                    break;
+                case 'collect_items':
+                    if (objective.type === 'collect_items') {
+                        if (!progress.progress.collected) progress.progress.collected = {};
+                        for (const item of Object.keys(objective.items)) {
+                            progress.progress.collected[item] = this.inventory[item] || 0;
+                        }
+                        progressed = true;
+                    }
+                    break;
+                case 'tribulation':
+                    if (objective.type === 'tribulation' && this.realm === objective.target) {
+                        progress.progress.tribulation = true;
+                        progressed = true;
+                    }
+                    break;
+                case 'defeat_monsters':
+                    if (objective.type === 'defeat_monsters') {
+                        progress.progress.defeated = (progress.progress.defeated || 0) + 1;
+                        progressed = true;
+                    }
+                    break;
+            }
+
+            if (progressed && this.checkStageCompletion(questId, currentStage)) {
+                this.completeQuestStage(questId, currentStage);
+                updatedQuests.push({ questId, quest });
+            }
+        }
+        return updatedQuests;
+    }
+
+    // 检查阶段是否完成
+    checkStageCompletion(questId, stage) {
+        const progress = this.questProgress[questId];
+        const objective = stage.objective;
+
+        switch (objective.type) {
+            case 'cultivate':
+                return (progress.progress.cultivated || 0) >= objective.target;
+            case 'breakthrough':
+                return this.level >= objective.target;
+            case 'adventure':
+            case 'defeat_monsters':
+                return (progress.progress.adventures || progress.progress.defeated || 0) >= objective.target;
+            case 'sect_contribution':
+                return this.sectContribution >= objective.target;
+            case 'sect_rank':
+                return this.sectRank === objective.target;
+            case 'collect_items':
+                for (const [item, count] of Object.entries(objective.items)) {
+                    if ((this.inventory[item] || 0) < count) return false;
+                }
+                return true;
+            case 'tribulation':
+                return progress.progress.tribulation === true;
+            default:
+                return false;
+        }
+    }
+
+    // 完成任务阶段
+    completeQuestStage(questId, stage) {
+        const quest = CONFIG.storyQuests[questId];
+        const onComplete = stage.onComplete;
+
+        // 发放奖励
+        if (stage.rewards) {
+            for (const reward of stage.rewards) {
+                switch (reward.type) {
+                    case 'spirit_stones':
+                        this.addSpiritStones(reward.value);
+                        break;
+                    case 'cultivation':
+                        this.addCultivation(reward.value);
+                        break;
+                    case 'item':
+                        this.addItem(reward.value, reward.quantity || 1);
+                        break;
+                    case 'skill':
+                        if (!this.skills[reward.value]) {
+                            this.skills[reward.value] = { level: 1 };
+                        }
+                        break;
+                    case 'artifact':
+                        this.artifacts.push(reward.value);
+                        break;
+                    case 'sect_contribution':
+                        this.sectContribution += reward.value;
+                        break;
+                    case 'sect_reputation':
+                        this.sectReputation += reward.value;
+                        break;
+                }
+            }
+        }
+
+        this.addLog(onComplete.message, 'legendary');
+
+        // 设置剧情标记
+        if (onComplete.setFlag) {
+            this.storyFlags[onComplete.setFlag.flag] = onComplete.setFlag.value;
+        }
+
+        // 进入下一章节
+        if (onComplete.nextChapter) {
+            this.currentChapter = onComplete.nextChapter;
+            this.addLog(`进入第${onComplete.nextChapter}章！`, 'legendary');
+        }
+
+        // 移动到下一阶段
+        const nextStageIndex = quest.stages.indexOf(stage) + 1;
+        if (nextStageIndex < quest.stages.length) {
+            this.questProgress[questId].currentStage = quest.stages[nextStageIndex].id;
+            this.questProgress[questId].progress = {};
+            const nextStage = quest.stages[nextStageIndex];
+            this.addLog(`新任务目标：${nextStage.name}`, 'rare');
+        } else {
+            this.completeQuest(questId);
+        }
+    }
+
+    // 完成任务
+    completeQuest(questId) {
+        if (!this.questProgress[questId]) return;
+        delete this.questProgress[questId];
+        this.completedQuests.push(questId);
+        const quest = CONFIG.storyQuests[questId];
+        this.addLog(`任务完成：${quest.name}`, 'legendary');
+    }
+
+    // 获取任务进度描述
+    getQuestProgressText(questId) {
+        const progress = this.questProgress[questId];
+        const quest = CONFIG.storyQuests[questId];
+        if (!progress || !quest) return '未开始';
+
+        const currentStage = quest.stages.find(s => s.id === progress.currentStage);
+        if (!currentStage) return '已完成';
+
+        const objective = currentStage.objective;
+        switch (objective.type) {
+            case 'cultivate':
+                return `修炼进度：${progress.progress.cultivated || 0}/${objective.target}`;
+            case 'breakthrough':
+                return `突破层级：${this.level}/${objective.target}层`;
+            case 'adventure':
+                return `历练次数：${progress.progress.adventures || 0}/${objective.target}`;
+            case 'sect_contribution':
+                return `宗门贡献：${this.sectContribution}/${objective.target}`;
+            case 'sect_rank':
+                return `当前等级：${this.sectRank}，目标：${objective.target}`;
+            case 'collect_items':
+                let text = '收集物品：';
+                for (const [item, count] of Object.entries(objective.items)) {
+                    text += `${item} ${this.inventory[item] || 0}/${count} `;
+                }
+                return text;
+            case 'tribulation':
+                return this.realm === objective.target ? '已达成' : `需达到${objective.target}`;
+            case 'defeat_monsters':
+                return `击败怪物：${progress.progress.defeated || 0}/${objective.target}`;
+            default:
+                return currentStage.description;
+        }
     }
 
     // 显示战斗界面
