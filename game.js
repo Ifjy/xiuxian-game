@@ -1863,6 +1863,57 @@ class GameState {
         return base * buffMultiplier * finalFactor;
     }
 
+    // 计算境界压制
+    calculateRealmSuppression(targetRealm, targetLevel) {
+        const realmNames = Object.keys(CONFIG.realms);
+        const playerRealmIndex = realmNames.indexOf(this.realm);
+        const targetRealmIndex = realmNames.indexOf(targetRealm);
+
+        // 同境界，计算层级压制
+        if (playerRealmIndex === targetRealmIndex) {
+            const levelDiff = this.level - targetLevel;
+            if (levelDiff > 0) {
+                // 玩家层级更高，有轻微压制
+                return {
+                    hasSuppression: true,
+                    suppressionLevel: 'minor',
+                    multiplier: 1 + (levelDiff * 0.1), // 每高1层加10%
+                    description: `${levelDiff}层压制`
+                };
+            }
+            return { hasSuppression: false, multiplier: 1 };
+        }
+
+        // 不同境界，计算境界压制
+        const realmDiff = playerRealmIndex - targetRealmIndex;
+
+        if (realmDiff > 0) {
+            // 玩家境界更高，有境界压制
+            // 1个大境界压制 = 2倍属性差距
+            const baseMultiplier = 1 + (realmDiff * 1.0);
+
+            return {
+                hasSuppression: true,
+                suppressionLevel: realmDiff >= 3 ? 'major' : 'moderate',
+                multiplier: baseMultiplier,
+                description: `${realmDiff}个大境界压制`
+            };
+        } else if (realmDiff < 0) {
+            // 玩家境界更低，被境界压制
+            // 被压制时，玩家属性降低
+            const baseMultiplier = 1 / (1 + Math.abs(realmDiff) * 1.0);
+
+            return {
+                hasSuppression: true,
+                suppressionLevel: 'suppressed',
+                multiplier: baseMultiplier,
+                description: `被${Math.abs(realmDiff)}个大境界压制`
+            };
+        }
+
+        return { hasSuppression: false, multiplier: 1 };
+    }
+
     // 计算战斗属性（完善版）
     calculateCombatStats() {
         const realmConfig = CONFIG.realms[this.realm];
@@ -2676,12 +2727,31 @@ class GameState {
             }
         }
 
+        // 计算境界压制
+        const suppression = this.calculateRealmSuppression(monster.requirements.realm, monster.requirements.level);
+
         // 计算战斗属性
         const playerStats = this.calculateCombatStats();
 
+        // 应用境界压制效果
+        let finalPlayerAttack = playerStats.attack;
+        let finalPlayerDefense = playerStats.defense;
+
+        if (suppression.hasSuppression) {
+            if (suppression.suppressionLevel === 'suppressed') {
+                // 玩家被压制，属性降低
+                finalPlayerAttack *= suppression.multiplier;
+                finalPlayerDefense *= suppression.multiplier;
+            } else {
+                // 玩家压制怪物
+                finalPlayerAttack *= suppression.multiplier;
+                finalPlayerDefense *= suppression.multiplier;
+            }
+        }
+
         // 战斗计算
-        const playerDamage = Math.max(1, playerStats.attack - monster.defense);
-        const monsterDamage = Math.max(1, monster.attack - playerStats.defense);
+        const playerDamage = Math.max(1, finalPlayerAttack - monster.defense);
+        const monsterDamage = Math.max(1, monster.attack - finalPlayerDefense);
 
         // 计算回合数
         const playerRounds = Math.ceil(monster.hp / playerDamage);
@@ -2692,6 +2762,16 @@ class GameState {
         const actualMonsterRounds = luckReduction ? Math.max(1, monsterRounds - 1) : monsterRounds;
 
         const victory = playerRounds <= actualMonsterRounds;
+
+        // 构建压制信息
+        let suppressionInfo = '';
+        if (suppression.hasSuppression) {
+            if (suppression.suppressionLevel === 'suppressed') {
+                suppressionInfo = `【被${suppression.description}，属性${(suppression.multiplier * 100).toFixed(0)}%】`;
+            } else {
+                suppressionInfo = `【${suppression.description}，属性${(suppression.multiplier * 100).toFixed(0)}%】`;
+            }
+        }
 
         if (victory) {
             // 胜利，获得奖励
@@ -2718,7 +2798,7 @@ class GameState {
                 this.cultivation = Math.max(0, this.cultivation - cultivationLoss);
             }
 
-            let message = `战胜了${monster.name}！获得${spiritStones}灵石，${cultivation}修为`;
+            let message = `战胜了${monster.name}！${suppressionInfo}获得${spiritStones}灵石，${cultivation}修为`;
             if (droppedItems.length > 0) {
                 message += `，获得${droppedItems.join('、')}`;
             }
