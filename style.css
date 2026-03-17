@@ -1272,6 +1272,242 @@ body {
     color: var(--accent-color);
 }
 
+/* 剧情任务样式 */
+.quest-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.quest-list-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.empty-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.quest-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quest-card:hover {
+    border-color: var(--accent-color);
+    background: rgba(0, 255, 0, 0.05);
+    transform: translateX(5px);
+}
+
+.quest-card-main {
+    border-left: 3px solid var(--legendary-color);
+}
+
+.quest-card-side {
+    border-left: 3px solid var(--rare-color);
+}
+
+.quest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.quest-title {
+    color: var(--accent-color);
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.quest-chapter {
+    color: var(--rare-color);
+    font-size: 11px;
+}
+
+.quest-description {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.quest-current-stage {
+    background: var(--panel-bg);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px dashed var(--border-color);
+}
+
+.stage-name {
+    color: var(--warning-color);
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stage-description {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.stage-progress {
+    color: var(--success-color);
+    font-size: 11px;
+}
+
+.quest-not-started {
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.start-hint {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.quest-rewards {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.rewards-title {
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.rewards-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.reward-item {
+    background: var(--panel-bg);
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    color: var(--warning-color);
+    font-size: 10px;
+}
+
+/* 任务详情界面 */
+.quest-detail-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.quest-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-color);
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.quest-detail-title {
+    color: var(--legendary-color);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.quest-detail-type {
+    color: var(--rare-color);
+    font-size: 12px;
+}
+
+.quest-detail-description {
+    background: var(--bg-color);
+    padding: 15px;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.6;
+    border: 1px solid var(--border-color);
+}
+
+.quest-detail-stage {
+    background: var(--bg-color);
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.stage-title {
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.stage-desc {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.stage-progress-text {
+    color: var(--success-color);
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.quest-detail-rewards {
+    background: var(--bg-color);
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.reward-item-detail {
+    background: var(--panel-bg);
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    color: var(--warning-color);
+    font-size: 12px;
+    text-align: center;
+}
+
+.quest-detail-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.quest-back-btn {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 13px;
+}
+
+.quest-back-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
 /* 响应式设计 */
 @media (max-width: 1024px) {
     .main-content {

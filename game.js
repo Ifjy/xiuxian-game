@@ -4822,6 +4822,19 @@ class GameUI {
                 }
             });
 
+            const questBtn = document.getElementById('questBtn');
+            if (questBtn) {
+                questBtn.addEventListener('click', () => {
+                    try {
+                        this.showQuestModal();
+                    } catch (e) {
+                        console.error('显示任务界面出错:', e);
+                        this.state.addLog('任务界面打开失败：' + e.message, 'danger');
+                        this.updateLogs();
+                    }
+                });
+            }
+
             document.getElementById('saveMenuBtn').addEventListener('click', () => {
                 this.state.save();
                 this.state.addLog('游戏已保存', 'success');
@@ -6504,6 +6517,180 @@ class GameUI {
                 }
             });
         });
+
+        modal.classList.add('active');
+    }
+
+    // ==================== 剧情任务界面 ====================
+
+    // 显示任务界面
+    showQuestModal() {
+        const modal = document.getElementById('gameModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalHeader = document.getElementById('modalHeader');
+
+        modalHeader.querySelector('pre').textContent = '┌─── 任 务 列 表 ───┐';
+
+        const availableQuests = this.state.getAvailableQuests();
+
+        if (availableQuests.length === 0) {
+            modalBody.innerHTML = `
+                <div class="quest-list-empty">
+                    <div class="empty-title">暂无可用任务</div>
+                    <div class="empty-hint">继续修仙，提升境界以解锁更多任务</div>
+                </div>
+            `;
+        } else {
+            let html = '<div class="quest-list-container">';
+
+            availableQuests.forEach(quest => {
+                const isMainQuest = quest.type === 'main';
+                const questClass = isMainQuest ? 'quest-card-main' : 'quest-card-side';
+                const questTypeText = isMainQuest ? '【主线】' : '【支线】';
+                const currentStage = quest.currentStage;
+                const inProgress = this.state.questProgress[quest.id];
+
+                html += `
+                    <div class="quest-card ${questClass}" data-quest="${quest.id}">
+                        <div class="quest-header">
+                            <div class="quest-title">${questTypeText}${quest.name}</div>
+                            <div class="quest-chapter">第${quest.chapter}章</div>
+                        </div>
+                        <div class="quest-description">${quest.description}</div>
+                `;
+
+                if (currentStage) {
+                    const progressText = this.state.getQuestProgressText(quest.id);
+                    html += `
+                        <div class="quest-current-stage">
+                            <div class="stage-name">当前目标：${currentStage.name}</div>
+                            <div class="stage-description">${currentStage.description}</div>
+                            <div class="stage-progress">${progressText}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="quest-not-started">
+                            <div class="start-hint">点击开始任务</div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                        <div class="quest-rewards">
+                            <div class="rewards-title">完成奖励：</div>
+                            <div class="rewards-list">
+                `;
+
+                if (currentStage) {
+                    currentStage.rewards.forEach(reward => {
+                        html += `<span class="reward-item">${this.formatQuestReward(reward)}</span>`;
+                    });
+                }
+
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            modalBody.innerHTML = html;
+
+            // 绑定任务卡片点击事件
+            modalBody.querySelectorAll('.quest-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const questId = card.getAttribute('data-quest');
+                    if (this.state.questProgress[questId]) {
+                        this.showQuestDetailModal(questId);
+                    } else {
+                        const result = this.state.startQuest(questId);
+                        if (result.success) {
+                            this.updateDisplay();
+                            this.showQuestModal();
+                        } else {
+                            alert(result.message);
+                        }
+                    }
+                });
+            });
+        }
+
+        modal.classList.add('active');
+    }
+
+    // 格式化奖励文本
+    formatQuestReward(reward) {
+        switch (reward.type) {
+            case 'spirit_stones': return `${reward.value}灵石`;
+            case 'cultivation': return `${reward.value}修为`;
+            case 'item': return `${reward.value}×${reward.quantity || 1}`;
+            case 'skill': return `功法：${reward.value}`;
+            case 'artifact': return `法宝：${reward.value}`;
+            case 'sect_contribution': return `${reward.value}贡献`;
+            case 'sect_reputation': return `${reward.value}声望`;
+            default: return '未知奖励';
+        }
+    }
+
+    // 显示任务详情
+    showQuestDetailModal(questId) {
+        const quest = CONFIG.storyQuests[questId];
+        if (!quest) return;
+
+        const modal = document.getElementById('gameModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalHeader = document.getElementById('modalHeader');
+
+        modalHeader.querySelector('pre').textContent = `┌─── 任 务 详 情 ───┐`;
+
+        const currentStage = this.state.getCurrentQuestStage(questId);
+        const progressText = this.state.getQuestProgressText(questId);
+
+        let html = `
+            <div class="quest-detail-container">
+                <div class="quest-detail-header">
+                    <div class="quest-detail-title">${quest.name}</div>
+                    <div class="quest-detail-type">${quest.type === 'main' ? '主线任务' : '支线任务'}</div>
+                </div>
+
+                <div class="quest-detail-description">${quest.description}</div>
+
+                <div class="quest-detail-stage">
+                    <div class="stage-title">当前目标</div>
+                    <div class="stage-name">${currentStage.name}</div>
+                    <div class="stage-desc">${currentStage.description}</div>
+                    <div class="stage-progress-text">${progressText}</div>
+                </div>
+
+                <div class="quest-detail-rewards">
+                    <div class="rewards-title">阶段奖励</div>
+                    <div class="rewards-grid">
+        `;
+
+        currentStage.rewards.forEach(reward => {
+            html += `<div class="reward-item-detail">${this.formatQuestReward(reward)}</div>`;
+        });
+
+        html += `
+                    </div>
+                </div>
+
+                <div class="quest-detail-actions">
+                    <div class="quest-back-btn" data-close="true">返回列表</div>
+                </div>
+            </div>
+        `;
+
+        modalBody.innerHTML = html;
+
+        const backBtn = modalBody.querySelector('.quest-back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.showQuestModal();
+            });
+        }
 
         modal.classList.add('active');
     }
