@@ -2807,7 +2807,11 @@ class GameState {
             this.checkAndLearnCombatSkills();
 
             // 更新任务进度
-            this.updateQuestProgress('breakthrough', this.level);
+            try {
+                this.updateQuestProgress('breakthrough', this.level);
+            } catch (error) {
+                console.error('任务进度更新失败:', error);
+            }
 
             return { success: true, message: '突破成功！' };
         } else {
@@ -2984,8 +2988,12 @@ class GameState {
         const oldCultivation = this.cultivation;
         this.cultivation = Math.floor(this.cultivation + amount);
 
-        // 更新任务进度
-        this.updateQuestProgress('cultivate', amount);
+        // 更新任务进度（使用try-catch防止错误影响修炼）
+        try {
+            this.updateQuestProgress('cultivate', amount);
+        } catch (error) {
+            console.error('任务进度更新失败:', error);
+        }
 
         // 先检查是否达到自动突破条件（在限制之前）
         if (oldCultivation < this.maxCultivation * 2 && this.cultivation >= this.maxCultivation * 2) {
@@ -3227,7 +3235,11 @@ class GameState {
         this.adventureEndTime = 0;
 
         // 更新任务进度
-        this.updateQuestProgress('adventure', 1);
+        try {
+            this.updateQuestProgress('adventure', 1);
+        } catch (error) {
+            console.error('任务进度更新失败:', error);
+        }
     }
 
     // 开始秘境探索
