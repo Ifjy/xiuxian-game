@@ -1272,6 +1272,141 @@ body {
     color: var(--accent-color);
 }
 
+/* 存档管理样式 */
+.save-management-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.save-info {
+    background: var(--bg-color);
+    border: 1px solid var(--warning-color);
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.save-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.save-slot-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    transition: all 0.2s ease;
+}
+
+.save-slot-card.current-slot {
+    border-color: var(--success-color);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.slot-title {
+    color: var(--accent-color);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.current-badge {
+    background: var(--success-color);
+    color: var(--bg-color);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.slot-empty {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.empty-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.save-action {
+    display: flex;
+    justify-content: center;
+}
+
+.slot-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-info {
+    background: var(--panel-bg);
+    padding: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.info-name {
+    color: var(--legendary-color);
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.info-details {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.info-details > div {
+    margin-bottom: 3px;
+}
+
+.slot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+}
+
+.slot-actions .action-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    min-width: 50px;
+}
+
+.save-global-actions {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+}
+
+.action-section-title {
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.save-global-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.save-global-actions > button {
+    align-self: flex-start;
+}
+
 /* 剧情任务样式 */
 .quest-list-container {
     display: flex;

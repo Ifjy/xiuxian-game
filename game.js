@@ -4872,11 +4872,18 @@ class GameUI {
                 });
             }
 
-            document.getElementById('saveMenuBtn').addEventListener('click', () => {
-                this.state.save();
-                this.state.addLog('游戏已保存', 'success');
-                this.updateDisplay();
-            });
+            const saveMenuBtn = document.getElementById('saveMenuBtn');
+            if (saveMenuBtn) {
+                saveMenuBtn.addEventListener('click', () => {
+                    try {
+                        this.showSaveModal();
+                    } catch (e) {
+                        console.error('显示存档界面出错:', e);
+                        this.state.addLog('存档界面打开失败：' + e.message, 'danger');
+                        this.updateLogs();
+                    }
+                });
+            }
 
             document.getElementById('MainMenuBtn').addEventListener('click', () => {
                 if (confirm('确定要返回主菜单吗？未保存的进度将会丢失！')) {
@@ -4917,6 +4924,253 @@ class GameUI {
             console.error('按钮事件绑定错误:', error);
             alert('按钮事件绑定失败：' + error.message);
         }
+    }
+
+    // ==================== 存档管理界面 ====================
+
+    showSaveModal() {
+        const modal = document.getElementById('gameModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalHeader = document.getElementById('modalHeader');
+
+        modalHeader.querySelector('pre').textContent = '┌─── 存 档 管 理 ───┐';
+
+        const allSaves = SaveManager.getAllSaves();
+        const currentSlot = this.state.saveSlot;
+
+        let html = `
+            <div class="save-management-container">
+                <div class="save-info">
+                    <div style="color: var(--text-secondary); font-size: 12px; margin-bottom: 15px;">
+                        💾 存档存储在浏览器中，清除浏览器数据会丢失存档！<br>
+                        ⬇️ 建议定期导出存档备份
+                    </div>
+                </div>
+
+                <div class="save-slots">
+        `;
+
+        allSaves.forEach(save => {
+            const isEmpty = save.empty;
+            const isCurrent = save.slot === currentSlot;
+
+            html += `
+                <div class="save-slot-card ${isCurrent ? 'current-slot' : ''}" data-slot="${save.slot}">
+                    <div class="slot-header">
+                        <div class="slot-title">存档槽位 ${save.slot}</div>
+                        ${isCurrent ? '<div class="current-badge">当前</div>' : ''}
+                    </div>
+            `;
+
+            if (isEmpty) {
+                html += `
+                    <div class="slot-empty">
+                        <div class="empty-text">空槽位</div>
+                        <div class="save-action">
+                            <button class="action-btn save-to-slot-btn" data-slot="${save.slot}">[保存到此处]</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const saveDate = save.lastSaveTime ? new Date(save.lastSaveTime).toLocaleString('zh-CN') : '未知';
+                html += `
+                    <div class="slot-content">
+                        <div class="player-info">
+                            <div class="info-name">${save.playerName || '未知'}</div>
+                            <div class="info-details">
+                                <div>道号：${save.daoName || '无'}</div>
+                                <div>境界：${save.realm || '未知'} ${save.level || 0}层</div>
+                                <div>灵石：${save.spiritStones || 0}</div>
+                                <div>保存时间：${saveDate}</div>
+                            </div>
+                        </div>
+                        <div class="slot-actions">
+                            <button class="action-btn load-save-btn" data-slot="${save.slot}">[加载]</button>
+                            <button class="action-btn save-to-slot-btn" data-slot="${save.slot}">[覆盖]</button>
+                            <button class="action-btn export-save-btn" data-slot="${save.slot}">[导出]</button>
+                            <button class="action-btn danger delete-save-btn" data-slot="${save.slot}">[删除]</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+        });
+
+        html += `
+                </div>
+
+                <div class="save-global-actions">
+                    <div class="action-section-title">批量操作</div>
+                    <button class="action-btn export-all-btn" id="exportAllBtn">[导出所有存档]</button>
+                    <button class="action-btn import-save-btn" id="importSaveBtn">[导入存档]</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+            </div>
+        `;
+
+        modalBody.innerHTML = html;
+
+        // 绑定保存按钮事件
+        modalBody.querySelectorAll('.save-to-slot-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const slot = parseInt(btn.getAttribute('data-slot'));
+                this.state.saveSlot = slot;
+                this.state.save();
+                this.state.addLog(`已保存到槽位${slot}`, 'success');
+                this.showSaveModal(); // 刷新界面
+                this.updateDisplay();
+            });
+        });
+
+        // 绑定加载按钮事件
+        modalBody.querySelectorAll('.load-save-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const slot = parseInt(btn.getAttribute('data-slot'));
+                if (confirm(`确定要加载槽位${slot}的存档吗？当前进度将丢失！`)) {
+                    const loadedState = SaveManager.load(slot);
+                    if (loadedState) {
+                        window.location.reload(); // 重新加载页面应用新存档
+                    } else {
+                        alert('存档加载失败');
+                    }
+                }
+            });
+        });
+
+        // 绑定删除按钮事件
+        modalBody.querySelectorAll('.delete-save-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const slot = parseInt(btn.getAttribute('data-slot'));
+                if (confirm(`确定要删除槽位${slot}的存档吗？此操作不可恢复！`)) {
+                    SaveManager.delete(slot);
+                    this.state.addLog(`槽位${slot}存档已删除`, 'info');
+                    this.showSaveModal(); // 刷新界面
+                }
+            });
+        });
+
+        // 绑定导出单个存档按钮
+        modalBody.querySelectorAll('.export-save-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const slot = parseInt(btn.getAttribute('data-slot'));
+                this.exportSingleSave(slot);
+            });
+        });
+
+        // 绑定导出所有存档按钮
+        const exportAllBtn = modalBody.querySelector('#exportAllBtn');
+        if (exportAllBtn) {
+            exportAllBtn.addEventListener('click', () => {
+                this.exportAllSaves();
+            });
+        }
+
+        // 绑定导入存档按钮
+        const importBtn = modalBody.querySelector('#importSaveBtn');
+        const fileInput = modalBody.querySelector('#importFileInput');
+        if (importBtn && fileInput) {
+            importBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.importSave(file);
+                }
+            });
+        }
+
+        modal.classList.add('active');
+    }
+
+    // 导出单个存档
+    exportSingleSave(slot) {
+        const saveData = SaveManager.load(slot);
+        if (!saveData) {
+            alert('存档不存在');
+            return;
+        }
+
+        const dataStr = JSON.stringify(saveData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `xiuxian_save_slot${slot}_${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+        this.state.addLog(`槽位${slot}存档已导出`, 'success');
+    }
+
+    // 导出所有存档
+    exportAllSaves() {
+        const allSaves = {
+            exportDate: new Date().toISOString(),
+            exportVersion: '2.0',
+            saves: {}
+        };
+
+        for (let i = 1; i <= SaveManager.MAX_SAVES; i++) {
+            const saveData = SaveManager.load(i);
+            if (saveData) {
+                allSaves.saves[i] = saveData;
+            }
+        }
+
+        const dataStr = JSON.stringify(allSaves, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `xiuxian_all_saves_${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+        this.state.addLog('所有存档已导出', 'success');
+    }
+
+    // 导入存档
+    importSave(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+
+                // 检查是单个存档还是批量存档
+                if (data.saves) {
+                    // 批量存档
+                    let importCount = 0;
+                    for (const [slot, saveData] of Object.entries(data.saves)) {
+                        SaveManager.save(parseInt(slot), saveData);
+                        importCount++;
+                    }
+                    alert(`成功导入${importCount}个存档！`);
+                    this.state.addLog(`成功导入${importCount}个存档`, 'success');
+                } else if (data.playerName) {
+                    // 单个存档
+                    const slot = data.saveSlot || 1;
+                    SaveManager.save(slot, data);
+                    alert(`存档已导入到槽位${slot}！`);
+                    this.state.addLog(`存档已导入到槽位${slot}`, 'success');
+                } else {
+                    alert('存档格式不正确');
+                }
+
+                this.showSaveModal(); // 刷新界面
+
+            } catch (error) {
+                alert('存档导入失败：' + error.message);
+                console.error('存档导入错误:', error);
+            }
+        };
+
+        reader.readAsText(file);
     }
 
     showInventory() {
