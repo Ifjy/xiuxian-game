@@ -2930,6 +2930,9 @@ class GameUI {
                 // 检查buff
                 this.state.checkBuffs();
 
+                // 新增：检查活动状态（防止状态卡死）
+                this.state.checkActivityStatus();
+
                 // 更新总时间
                 this.state.totalDays += 1 / 86400;
 

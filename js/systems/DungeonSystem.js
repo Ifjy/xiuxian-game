@@ -482,4 +482,230 @@ export class DungeonSystem {
         this.state.inventory[itemName] += count;
         this.state.addLog(`获得${itemName} x${count}`, 'rare');
     }
+
+    // ========== 渡劫系统 ==========
+
+    // 开始渡劫
+    startTribulation(targetRealm) {
+        // 检查是否在渡劫配置中
+        const tribulationConfig = this.state.heavenlyTribulations?.[targetRealm];
+        if (!tribulationConfig) {
+            return { success: false, message: `${targetRealm}不需要渡劫或配置不存在` };
+        }
+
+        // 检查状态
+        if (!this.canDoAction('tribulation')) {
+            return { success: false, message: '当前状态无法渡劫' };
+        }
+
+        // 检查修为是否足够
+        if (!this.state.cultivationSystem.canBreakthrough()) {
+            return { success: false, message: '修为不足，无法渡劫' };
+        }
+
+        // 初始化渡劫状态
+        this.state.currentTribulation = {
+            targetRealm: targetRealm,
+            config: tribulationConfig,
+            currentWave: 0,
+            totalWaves: tribulationConfig.waves,
+            wavesCompleted: 0,
+            startTime: Date.now(),
+            preparations: {
+                itemsUsed: [],
+                helpers: []
+            }
+        };
+
+        this.state.isInTribulation = true;
+
+        this.state.addLog(`开始${tribulationConfig.name}！`, 'legendary');
+        this.state.addLog(tribulationConfig.description, 'info');
+        this.state.addLog(`共${tribulationConfig.waves}波天劫，请做好准备！`, 'warning');
+
+        return {
+            success: true,
+            message: `开始${tribulationConfig.name}`,
+            tribulation: this.state.currentTribulation
+        };
+    }
+
+    // 处理渡劫进程
+    processTribulation() {
+        if (!this.state.isInTribulation || !this.state.currentTribulation) {
+            return { success: false, message: '当前未在渡劫' };
+        }
+
+        const tribulation = this.state.currentTribulation;
+        const config = tribulation.config;
+
+        // 进入下一波
+        tribulation.currentWave++;
+        this.state.addLog(`第${tribulation.currentWave}波天劫降临！`, 'rare');
+
+        // 计算这一波的难度
+        const waveDifficulty = config.difficulty * (1 + (tribulation.currentWave - 1) * 0.2);
+
+        // 随机选择天劫类型
+        const tribulationType = config.types[Math.floor(Math.random() * config.types.length)];
+        this.state.addLog(`遭遇${tribulationType}！`, 'warning');
+
+        // 计算成功率
+        let successRate = config.baseSuccessRate;
+
+        // 应用各种加成
+        const playerStats = this.calculatePlayerStats();
+
+        // 境界压制
+        const realmIndex = ['炼气期', '筑基期', '金丹期', '元婴期', '化神期', '炼虚期', '合体期', '大乘期', '渡劫期'].indexOf(this.state.realm);
+        const targetIndex = ['炼气期', '筑基期', '金丹期', '元婴期', '化神期', '炼虚期', '合体期', '大乘期', '渡劫期'].indexOf(tribulation.targetRealm);
+
+        if (realmIndex >= targetIndex) {
+            successRate += 0.2; // 已经达到或超过目标境界，额外加成
+        }
+
+        // 功法加成
+        const skillConfig = this.state.skillConfig?.[this.state.currentSkill];
+        if (skillConfig && skillConfig.benefits?.breakthroughChance) {
+            successRate += skillConfig.benefits.breakthroughChance;
+        }
+
+        // 宗门加成
+        const sectConfig = this.state.sects?.find(s => s.id === this.state.sect);
+        if (sectConfig && sectConfig.benefits?.breakthroughChance) {
+            successRate += sectConfig.benefits.breakthroughChance;
+        }
+
+        // 悟性加成
+        successRate += this.state.talents?.wisdom * 0.01;
+
+        // 难度修正
+        successRate -= (waveDifficulty - 1) * 0.1;
+
+        // 限制在0.05-0.95之间
+        successRate = Math.max(0.05, Math.min(0.95, successRate));
+
+        // 判定结果
+        const success = Math.random() < successRate;
+
+        if (success) {
+            this.state.addLog(`成功抵挡第${tribulation.currentWave}波${tribulationType}！`, 'success');
+
+            tribulation.wavesCompleted++;
+
+            // 检查是否完成所有波次
+            if (tribulation.wavesCompleted >= tribulation.totalWaves) {
+                return this.completeTribulation(true);
+            }
+
+            return {
+                success: true,
+                message: `成功抵挡第${tribulation.currentWave}波`,
+                waveCompleted: true,
+                nextWave: tribulation.currentWave + 1,
+                totalWaves: tribulation.totalWaves
+            };
+        } else {
+            this.state.addLog(`未能抵挡第${tribulation.currentWave}波${tribulationType}！`, 'danger');
+
+            // 渡劫失败
+            return this.completeTribulation(false);
+        }
+    }
+
+    // 完成渡劫
+    completeTribulation(success) {
+        const tribulation = this.state.currentTribulation;
+        const config = tribulation.config;
+
+        this.state.isInTribulation = false;
+
+        if (success) {
+            // 渡劫成功
+            this.state.addLog(`成功渡过${config.name}！`, 'legendary');
+
+            // 突破到下一境界
+            const targetRealm = tribulation.targetRealm;
+            this.state.realm = targetRealm;
+            this.state.level = 1;
+            this.state.cultivation = 0;
+            this.state.maxCultivation = this.state.realms[targetRealm].maxCultivation;
+
+            this.state.addLog(`成功突破到${targetRealm}！`, 'legendary');
+
+            // 检查成就
+            this.state.checkRealmAchievement();
+
+            // 清理渡劫状态
+            this.state.currentTribulation = null;
+
+            return {
+                success: true,
+                message: `成功渡过${config.name}，突破到${targetRealm}！`,
+                breakthrough: true,
+                newRealm: targetRealm
+            };
+        } else {
+            // 渡劫失败
+            this.state.addLog(`${config.name}失败！`, 'danger');
+
+            const penalty = config.failurePenalty;
+
+            // 损失修为
+            if (penalty.cultivationLoss) {
+                const lost = Math.floor(this.state.cultivation * penalty.cultivationLoss);
+                this.state.cultivation -= lost;
+                this.state.addLog(`损失${lost}修为`, 'warning');
+            }
+
+            // 可能受伤
+            if (penalty.possibilityOfInjury && Math.random() < penalty.possibilityOfInjury) {
+                this.state.addLog('渡劫失败受了重伤！', 'danger');
+                // 可以添加受伤状态
+            }
+
+            // 可能境界跌落
+            if (penalty.possibilityOfRealmDrop && Math.random() < penalty.possibilityOfRealmDrop) {
+                const realmNames = ['炼气期', '筑基期', '金丹期', '元婴期', '化神期'];
+                const currentIndex = realmNames.indexOf(this.state.realm);
+                if (currentIndex > 0) {
+                    this.state.realm = realmNames[currentIndex - 1];
+                    this.state.level = this.state.realms[this.state.realm].levels;
+                    this.state.addLog(`境界跌落至${this.state.realm}！`, 'danger');
+                }
+            }
+
+            // 清理渡劫状态
+            this.state.currentTribulation = null;
+
+            return {
+                success: false,
+                message: `${config.name}失败`,
+                failure: true
+            };
+        }
+    }
+
+    // 检查是否可以进行某个操作（扩展版）
+    canDoAction(action) {
+        if (this.state.isAdventuring) {
+            return { can: false, message: '历练中无法进行此操作' };
+        }
+        if (this.state.isWorking) {
+            return { can: false, message: '打工中无法进行此操作' };
+        }
+        if (this.state.isExploring) {
+            return { can: false, message: '探索秘境中无法进行此操作' };
+        }
+        if (this.state.isMeditating) {
+            return { can: false, message: '入定中无法进行此操作' };
+        }
+        if (this.state.isInDungeon) {
+            return { can: false, message: '副本中无法进行此操作' };
+        }
+        if (this.state.isInTribulation) {
+            return { can: false, message: '渡劫中无法进行此操作' };
+        }
+        return { can: true };
+    }
 }

@@ -8,6 +8,7 @@
  * - 系统模块集成
  */
 import { GAME_CONFIG } from '../config/GameConfig.js';
+import { MONSTERS_CONFIG } from '../config/MonstersConfig.js';
 import { SaveManager } from './SaveManager.js';
 import { CultivationSystem } from '../systems/CultivationSystem.js';
 import { AdventureSystem } from '../systems/AdventureSystem.js';
@@ -148,6 +149,21 @@ export class GameState {
         this.spiritualRoots = GAME_CONFIG.spiritualRoots;
         this.backgrounds = GAME_CONFIG.backgrounds;
         this.skillConfig = GAME_CONFIG.skills; // 技能配置，不覆盖已学技能
+
+        // 补充缺失的配置引用
+        this.storyQuests = GAME_CONFIG.storyQuests || {};
+        this.sects = GAME_CONFIG.sects || {};
+        this.sectTasks = GAME_CONFIG.sectTasks || {};
+        this.sectShop = GAME_CONFIG.sectShop || {};
+        this.npcs = GAME_CONFIG.npcs || {};
+        this.pets = GAME_CONFIG.pets || {};
+        this.adventures = GAME_CONFIG.adventures || [];
+        this.jobs = GAME_CONFIG.jobs || [];
+        this.secretRealms = GAME_CONFIG.secretRealms || [];
+        this.sectRanks = GAME_CONFIG.sectRanks || {};
+        this.combatSkills = GAME_CONFIG.combatSkills || {};
+        this.meditationEvents = GAME_CONFIG.meditationEvents || [];
+        this.heavenlyTribulations = MONSTERS_CONFIG.heavenlyTribulations || {};
 
         // 只在创建新角色时应用出身加成
         if (!characterData || !characterData.playerName) {
@@ -661,11 +677,18 @@ export class GameState {
     checkBuffs() {
         const now = Date.now();
 
-        // 检查修炼buff
+        // 检查修炼buff - 修复：同时重置isMeditating
         if (this.buffs.cultivation.endTime > 0 && now >= this.buffs.cultivation.endTime) {
             this.buffs.cultivation.multiplier = 1.0;
             this.buffs.cultivation.endTime = 0;
-            this.addLog('修炼加成效果已结束', 'info');
+
+            // 新增：重置打坐状态
+            if (this.isMeditating) {
+                this.isMeditating = false;
+                this.addLog('打坐结束', 'info');
+            } else {
+                this.addLog('修炼加成效果已结束', 'info');
+            }
         }
 
         // 检查突破buff
@@ -679,6 +702,31 @@ export class GameState {
         if (this.buffs.luck && now >= this.buffs.luck.endTime) {
             this.buffs.luck = null;
             this.addLog('幸运加成效果已结束', 'info');
+        }
+    }
+
+    // 检查所有活动状态是否超时
+    checkActivityStatus() {
+        const now = Date.now();
+
+        // 检查历练状态
+        if (this.isAdventuring && this.adventureEndTime > 0 && now >= this.adventureEndTime) {
+            this.addLog('检测到历练超时，自动完成', 'warning');
+            this.completeAdventure();
+        }
+
+        // 检查打工状态
+        if (this.isWorking && this.workEndTime > 0 && now >= this.workEndTime) {
+            this.addLog('检测到工作超时，强制结束', 'warning');
+            this.isWorking = false;
+            this.workEndTime = 0;
+            this.currentJob = null;
+        }
+
+        // 检查探索状态
+        if (this.isExploring && this.explorationEndTime > 0 && now >= this.explorationEndTime) {
+            this.addLog('检测到探索超时，自动完成', 'warning');
+            this.completeExploration();
         }
     }
 

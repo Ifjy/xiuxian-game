@@ -389,32 +389,6 @@ export class CombatSystem {
         return { success: true, message: `使用了${skill.name}` };
     }
 
-    // 渡劫系统
-    performHeavenlyTribulation(targetRealm) {
-        const tribulation = this.state.heavenlyTribulations[targetRealm];
-        if (!tribulation) {
-            return { success: false, message: '此境界无需渡劫' };
-        }
-
-        // 保存渡劫状态
-        this.state.tribulationState = {
-            targetRealm: targetRealm,
-            currentWave: 0,
-            totalWaves: tribulation.waves,
-            isTribulating: true,
-            preparation: {
-                itemsUsed: [],
-                helpersInvited: []
-            }
-        };
-
-        return {
-            success: true,
-            message: `开始渡劫${tribulation.name}`,
-            tribulation: tribulation
-        };
-    }
-
     // 获取法宝
     acquireArtifact(artifactId) {
         const artifact = this.state.artifacts[artifactId];

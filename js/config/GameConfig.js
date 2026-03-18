@@ -590,6 +590,50 @@ sects: [
         requirements: {},
         benefits: {},
         joinCost: 0
+    },
+    {
+        id: 'qingyun_sect',
+        name: '青云宗',
+        description: '正道大宗，讲究循序渐进，稳扎稳打',
+        requirements: { realm: '炼气期', level: 3 },
+        benefits: {
+            cultivationBonus: 0.1,
+            defenseBonus: 0.05
+        },
+        joinCost: 500
+    },
+    {
+        id: 'tianjian_sect',
+        name: '天剑宗',
+        description: '剑修圣地，攻击力强大',
+        requirements: { realm: '炼气期', level: 5 },
+        benefits: {
+            attackBonus: 0.15,
+            breakthroughChance: 0.05
+        },
+        joinCost: 800
+    },
+    {
+        id: 'yaowang_valley',
+        name: '药王谷',
+        description: '炼丹圣地，擅长炼丹和治疗',
+        requirements: { realm: '炼气期', level: 3 },
+        benefits: {
+            alchemyBonus: 0.2,
+            healthRegen: 0.1
+        },
+        joinCost: 600
+    },
+    {
+        id: 'demon_sect',
+        name: '魔教',
+        description: '魔道大宗，实力强大但修炼艰难',
+        requirements: { realm: '筑基期', level: 1 },
+        benefits: {
+            cultivationBonus: 0.2,
+            attackBonus: 0.1
+        },
+        joinCost: 2000
     }
 ],
 
@@ -941,6 +985,270 @@ sectShop: {
             chapter: 2,
             rewards: [
                 { type: 'item', value: '聚气丹', amount: 5 }
+            ]
+        }
+    },
+    'cultivation_milestone_1': {
+        id: 'cultivation_milestone_1',
+        chapter: 1,
+        name: '修炼小成',
+        description: '积累修为，稳固根基',
+        type: 'side',
+        requirements: { realm: '炼气期', level: 1 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '积累修为',
+                description: '修炼到500修为',
+                objective: { type: 'cultivate', target: 500 },
+                rewards: [
+                    { type: 'cultivation', value: 100 },
+                    { type: 'spiritStones', value: 200 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '聚气丹', amount: 3 }
+            ]
+        }
+    },
+    'cultivation_milestone_2': {
+        id: 'cultivation_milestone_2',
+        chapter: 1,
+        name: '修炼精进',
+        description: '继续修炼，追求更高的境界',
+        type: 'side',
+        requirements: { realm: '炼气期', level: 3 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '精进修为',
+                description: '修炼到2000修为',
+                objective: { type: 'cultivate', target: 2000 },
+                rewards: [
+                    { type: 'cultivation', value: 200 },
+                    { type: 'spiritStones', value: 500 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '筑基丹', amount: 1 }
+            ]
+        }
+    },
+    'breakthrough_qi_refining': {
+        id: 'breakthrough_qi_refining',
+        chapter: 2,
+        name: '突破炼气期',
+        description: '努力突破到筑基期',
+        type: 'main',
+        requirements: { realm: '炼气期', level: 7 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '准备突破',
+                description: '达到炼气期9层',
+                objective: { type: 'breakthrough', target: 9 },
+                rewards: [
+                    { type: 'cultivation', value: 300 },
+                    { type: 'spiritStones', value: 1000 }
+                ],
+                onComplete: {
+                    message: '已做好突破准备，可以尝试突破到筑基期'
+                }
+            }
+        ],
+        onComplete: {
+            chapter: 3,
+            rewards: [
+                { type: 'item', value: '筑基丹', amount: 2 },
+                { type: 'item', value: '洗髓丹', amount: 1 }
+            ]
+        }
+    },
+    'adventure_exploration': {
+        id: 'adventure_exploration',
+        chapter: 1,
+        name: '历练探索',
+        description: '外出历练，增长见识',
+        type: 'side',
+        requirements: { realm: '炼气期', level: 2 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '初次历练',
+                description: '完成3次历练',
+                objective: { type: 'adventure', target: 3 },
+                rewards: [
+                    { type: 'spiritStones', value: 300 },
+                    { type: 'cultivation', value: 150 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '聚气丹', amount: 5 }
+            ]
+        }
+    },
+    'adventure_veteran': {
+        id: 'adventure_veteran',
+        chapter: 2,
+        name: '历练老手',
+        description: '成为历练达人',
+        type: 'side',
+        requirements: { realm: '炼气期', level: 5 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '多次历练',
+                description: '完成10次历练',
+                objective: { type: 'adventure', target: 10 },
+                rewards: [
+                    { type: 'spiritStones', value: 800 },
+                    { type: 'cultivation', value: 400 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '筑基丹', amount: 2 },
+                { type: 'item', value: '铁剑', amount: 1 }
+            ]
+        }
+    },
+    'combat_training': {
+        id: 'combat_training',
+        chapter: 1,
+        name: '战斗训练',
+        description: '通过战斗磨练技艺',
+        type: 'side',
+        requirements: { realm: '炼气期', level: 1 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '击败野兽',
+                description: '击败5只怪物',
+                objective: { type: 'defeat_monsters', target: 5 },
+                rewards: [
+                    { type: 'spiritStones', value: 200 },
+                    { type: 'cultivation', value: 100 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '聚气丹', amount: 3 }
+            ]
+        }
+    },
+    'combat_master': {
+        id: 'combat_master',
+        chapter: 2,
+        name: '战斗大师',
+        description: '成为战斗高手',
+        type: 'side',
+        requirements: { realm: '炼气期', level: 6 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '击败强敌',
+                description: '击败20只怪物',
+                objective: { type: 'defeat_monsters', target: 20 },
+                rewards: [
+                    { type: 'spiritStones', value: 1000 },
+                    { type: 'cultivation', value: 500 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '金剑', amount: 1 },
+                { type: 'item', value: '护甲', amount: 1 }
+            ]
+        }
+    },
+    'sect_joining': {
+        id: 'sect_joining',
+        chapter: 2,
+        name: '加入宗门',
+        description: '找到一个适合自己的宗门',
+        type: 'side',
+        requirements: { realm: '炼气期', level: 3 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '积累贡献',
+                description: '获得100宗门贡献',
+                objective: { type: 'sect_contribution', target: 100 },
+                rewards: [
+                    { type: 'spiritStones', value: 500 },
+                    { type: 'sect_contribution', value: 50 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '筑基丹', amount: 1 }
+            ]
+        }
+    },
+    'sect_promotion': {
+        id: 'sect_promotion',
+        chapter: 3,
+        name: '宗门晋升',
+        description: '在宗门中晋升等级',
+        type: 'side',
+        requirements: { sect: '!none', realm: '炼气期', level: 5 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '晋升内门',
+                description: '晋升到内门弟子',
+                objective: { type: 'sect_rank', target: '内门弟子' },
+                rewards: [
+                    { type: 'spiritStones', value: 1500 },
+                    { type: 'sect_contribution', value: 200 },
+                    { type: 'sect_reputation', value: 100 }
+                ]
+            }
+        ],
+        onComplete: {
+            rewards: [
+                { type: 'item', value: '洗髓丹', amount: 2 },
+                { type: 'item', value: '悟性丹', amount: 1 }
+            ]
+        }
+    },
+    'breakthrough_zhuji': {
+        id: 'breakthrough_zhuji',
+        chapter: 3,
+        name: '突破筑基期',
+        description: '努力突破到金丹期',
+        type: 'main',
+        requirements: { realm: '筑基期', level: 7 },
+        stages: [
+            {
+                id: 'stage1',
+                name: '准备突破',
+                description: '达到筑基期9层',
+                objective: { type: 'breakthrough', target: 9 },
+                rewards: [
+                    { type: 'cultivation', value: 1000 },
+                    { type: 'spiritStones', value: 5000 }
+                ],
+                onComplete: {
+                    message: '已做好突破准备，可以尝试突破到金丹期'
+                }
+            }
+        ],
+        onComplete: {
+            chapter: 4,
+            rewards: [
+                { type: 'item', value: '金丹', amount: 3 },
+                { type: 'item', value: '天劫符', amount: 1 }
             ]
         }
     }
