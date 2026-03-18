@@ -684,7 +684,41 @@ export class GameState {
 
     // 状态获取
     getCurrentState() {
+        let text = '修炼中';
+        let type = 'cultivating';
+        let endTime = 0;
+        let adventure = null;
+        let job = null;
+
+        // 确定当前状态
+        if (this.isMeditating) {
+            text = '打坐中';
+            type = 'meditating';
+        } else if (this.isAdventuring && this.adventureEndTime > 0) {
+            text = '历练中';
+            type = 'adventuring';
+            endTime = this.adventureEndTime;
+            adventure = this.currentAdventure;
+        } else if (this.isWorking && this.workEndTime > 0) {
+            text = '打工中';
+            type = 'working';
+            endTime = this.workEndTime;
+            job = this.currentJob;
+        } else if (this.isExploring && this.explorationEndTime > 0) {
+            text = '探索中';
+            type = 'exploring';
+            endTime = this.explorationEndTime;
+        } else if (this.isInDungeon) {
+            text = '副本中';
+            type = 'dungeon';
+        }
+
         return {
+            text,
+            type,
+            endTime,
+            adventure,
+            job,
             realm: this.realm,
             level: this.level,
             cultivation: this.cultivation,
