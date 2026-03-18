@@ -13,6 +13,7 @@
 export class QuestSystem {
     constructor(gameState) {
         this.state = gameState;
+        this._isUpdatingQuest = false; // 防止无限递归
     }
 
     // 接受任务
@@ -150,15 +151,23 @@ export class QuestSystem {
 
     // 更新任务进度
     updateQuestProgress(objectiveType, value) {
-        const updatedQuests = [];
-        for (const [questId, progress] of Object.entries(this.state.questProgress)) {
-            const quest = this.state.storyQuests[questId];
-            if (!quest) continue;
-            const currentStage = quest.stages.find(s => s.id === progress.currentStage);
-            if (!currentStage) continue;
+        // 防止无限递归：如果正在更新任务进度，直接返回
+        if (this._isUpdatingQuest) {
+            return [];
+        }
 
-            const objective = currentStage.objective;
-            let progressed = false;
+        this._isUpdatingQuest = true;
+        const updatedQuests = [];
+
+        try {
+            for (const [questId, progress] of Object.entries(this.state.questProgress)) {
+                const quest = this.state.storyQuests[questId];
+                if (!quest) continue;
+                const currentStage = quest.stages.find(s => s.id === progress.currentStage);
+                if (!currentStage) continue;
+
+                const objective = currentStage.objective;
+                let progressed = false;
 
             switch (objectiveType) {
                 case 'cultivate':
@@ -219,6 +228,11 @@ export class QuestSystem {
                 updatedQuests.push({ questId, quest });
             }
         }
+        } finally {
+            // 确保标志被重置
+            this._isUpdatingQuest = false;
+        }
+
         return updatedQuests;
     }
 
