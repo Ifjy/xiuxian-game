@@ -1,0 +1,15 @@
+@echo off
+echo ========================================
+echo   文字修仙 - 游戏服务器
+echo ========================================
+echo.
+echo 正在启动游戏服务器...
+echo.
+echo 游戏地址:
+echo   角色创建: http://localhost:8000/character-creation.html
+echo   主游戏:   http://localhost:8000/index.html
+echo.
+echo 按 Ctrl+C 停止服务器
+echo ========================================
+echo.
+python -m http.server 8000
