@@ -1029,4 +1029,58 @@ pets: {
         requirements: { realm: '合体期', level: 1 }
     }
 },
+
+// 境界成就配置
+realmAchievements: {
+    '炼气期': {
+        id: 'realm_qi',
+        name: '炼气初成',
+        requirements: { realm: '炼气期', level: 9 },
+        rewards: {
+            good: { chance: 0.5, items: ['聚气丹'], spiritStones: 100 },
+            normal: { items: ['聚气丹'], spiritStones: 50 }
+        },
+        description: '完成炼气期修炼'
+    },
+    '筑基期': {
+        id: 'realm_zhuji',
+        name: '筑基成功',
+        requirements: { realm: '筑基期', level: 9 },
+        rewards: {
+            good: { chance: 0.4, items: ['筑基丹'], spiritStones: 500 },
+            normal: { items: ['聚气丹 x3'], spiritStones: 200 }
+        },
+        description: '完成筑基期修炼'
+    },
+    '金丹期': {
+        id: 'realm_jindan',
+        name: '金丹大成',
+        requirements: { realm: '金丹期', level: 9 },
+        rewards: {
+            good: { chance: 0.3, items: ['筑基丹 x2'], spiritStones: 2000 },
+            normal: { items: ['聚气丹 x5'], spiritStones: 1000 }
+        },
+        description: '完成金丹期修炼'
+    },
+    '元婴期': {
+        id: 'realm_yuanying',
+        name: '元婴诞生',
+        requirements: { realm: '元婴期', level: 9 },
+        rewards: {
+            good: { chance: 0.2, items: ['金丹 x2'], spiritStones: 10000 },
+            normal: { items: ['筑基丹 x3'], spiritStones: 5000 }
+        },
+        description: '完成元婴期修炼'
+    },
+    '化神期': {
+        id: 'realm_huashen',
+        name: '化神大成',
+        requirements: { realm: '化神期', level: 9 },
+        rewards: {
+            good: { chance: 0.15, items: ['元婴丹 x2'], spiritStones: 50000 },
+            normal: { items: ['金丹 x3'], spiritStones: 20000 }
+        },
+        description: '完成化神期修炼'
+    }
+}
 };
