@@ -445,6 +445,13 @@ class GameUI {
 
         modalHeader.querySelector('pre').textContent = '┌─── 商 店 ───┐';
 
+        // 添加配置检查
+        if (!CONFIG || !CONFIG.items || !Array.isArray(CONFIG.items)) {
+            console.error('物品配置未正确加载');
+            this.showModal('商店', '<div class="error">物品配置未加载，请刷新页面</div>');
+            return;
+        }
+
         let html = '<div class="shop-tabs">';
         html += '<button class="shop-tab active" data-tab="items">道具</button>';
         html += '<button class="shop-tab" data-tab="skills">功法</button>';
@@ -453,13 +460,16 @@ class GameUI {
         html += '<div class="shop-tab-content" id="tabItems">';
         html += '<div class="shop-list">';
 
-        for (const [itemName, itemConfig] of Object.entries(CONFIG.items)) {
-            if (!itemConfig.price) continue;
+        // 遍历物品数组
+        for (const item of CONFIG.items) {
+            if (!item.price) continue;
+            const itemName = item.name;
+            const itemConfig = item;
 
             html += `
                 <div class="shop-item" data-item="${itemName}">
                     <div class="item-name">${itemName}</div>
-                    <div class="item-description">${itemConfig.description}</div>
+                    <div class="item-description">${itemConfig.description || ''}</div>
                     <div class="item-price">${itemConfig.price} 灵石</div>
                 </div>
             `;
@@ -504,7 +514,14 @@ class GameUI {
         modalBody.querySelectorAll('#tabItems .shop-item').forEach(item => {
             item.addEventListener('click', () => {
                 const itemName = item.getAttribute('data-item');
-                const itemConfig = CONFIG.items[itemName];
+                // 从数组中查找物品配置
+                const itemConfig = CONFIG.items.find(i => i.name === itemName);
+
+                if (!itemConfig) {
+                    alert(`物品配置不存在: ${itemName}`);
+                    return;
+                }
+
                 if (this.state.spiritStones >= itemConfig.price) {
                     this.state.spiritStones -= itemConfig.price;
                     this.state.addItem(itemName);
@@ -565,6 +582,20 @@ class GameUI {
 
         modalHeader.querySelector('pre').textContent = '┌─── 背 包 ───┐';
 
+        // 添加数据检查
+        if (!this.state.inventory) {
+            console.error('背包数据不存在');
+            this.showModal('背包', '<div class="error">背包数据不存在</div>');
+            return;
+        }
+
+        // 添加配置检查
+        if (!CONFIG || !CONFIG.items || !Array.isArray(CONFIG.items)) {
+            console.error('物品配置未正确加载');
+            this.showModal('背包', '<div class="error">物品配置未加载，请刷新页面</div>');
+            return;
+        }
+
         const items = Object.entries(this.state.inventory).filter(([name, count]) => count > 0);
 
         if (items.length === 0) {
@@ -573,13 +604,20 @@ class GameUI {
             let html = '<div class="inventory-list">';
 
             for (const [itemName, count] of items) {
-                const itemConfig = CONFIG.items[itemName];
+                // 从数组中查找物品配置
+                const itemConfig = CONFIG.items.find(item => item.name === itemName);
+
+                if (!itemConfig) {
+                    console.warn(`物品配置不存在: ${itemName}`);
+                    continue;
+                }
+
                 html += `
                     <div class="inventory-item" data-item="${itemName}">
                         <div class="item-name">${itemName} × ${count}</div>
-                        <div class="item-description">${itemConfig ? itemConfig.description : ''}</div>
+                        <div class="item-description">${itemConfig.description || ''}</div>
                         <div class="item-actions">
-                            ${itemConfig && itemConfig.consume ? '<button class="use-btn">使用</button>' : ''}
+                            ${itemConfig.consume ? '<button class="use-btn">使用</button>' : ''}
                             <button class="sell-btn">出售</button>
                         </div>
                     </div>
@@ -610,7 +648,14 @@ class GameUI {
                 btn.addEventListener('click', (e) => {
                     const itemDiv = e.target.closest('.inventory-item');
                     const itemName = itemDiv.getAttribute('data-item');
-                    const itemConfig = CONFIG.items[itemName];
+                    // 从数组中查找物品配置
+                    const itemConfig = CONFIG.items.find(item => item.name === itemName);
+
+                    if (!itemConfig) {
+                        alert(`物品配置不存在: ${itemName}`);
+                        return;
+                    }
+
                     const sellPrice = itemConfig.sellPrice || Math.floor(itemConfig.price * 0.3);
 
                     if (confirm(`确定要以${sellPrice}灵石出售${itemName}吗？`)) {

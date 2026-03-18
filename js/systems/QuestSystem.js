@@ -268,7 +268,9 @@ export class QuestSystem {
     // 完成任务阶段
     completeQuestStage(questId, stage) {
         const quest = this.state.storyQuests[questId];
-        const onComplete = stage.onComplete;
+
+        // 添加默认空对象，防止 undefined
+        const onComplete = stage.onComplete || {};
 
         // 发放奖励
         if (stage.rewards) {
@@ -277,14 +279,16 @@ export class QuestSystem {
             }
         }
 
-        this.state.addLog(onComplete.message, 'legendary');
+        // 安全访问 message，提供默认值
+        const message = onComplete.message || `完成阶段：${stage.name}`;
+        this.state.addLog(message, 'legendary');
 
-        // 设置剧情标记
+        // 安全设置剧情标记（检查字段存在性）
         if (onComplete.setFlag) {
             this.state.storyFlags[onComplete.setFlag.flag] = onComplete.setFlag.value;
         }
 
-        // 进入下一章节
+        // 安全进入下一章节（检查字段存在性）
         if (onComplete.nextChapter) {
             this.state.currentChapter = onComplete.nextChapter;
             this.state.addLog(`进入第${onComplete.nextChapter}章！`, 'legendary');
