@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字修仙游戏 - 测试套件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #eee;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .test-controls {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #0f3460;
+        }
+
+        .btn {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #ff6b6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #0f3460;
+        }
+
+        .btn-secondary:hover {
+            background: #1a5c9e;
+        }
+
+        .progress-container {
+            background: #0f3460;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #00cc00);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .test-output {
+            background: #0f0f23;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        .test-output::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .test-output::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        .test-output::-webkit-scrollbar-thumb {
+            background: #0f3460;
+            border-radius: 5px;
+        }
+
+        .summary {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #0f3460;
+        }
+
+        .summary h2 {
+            color: #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        .stat-value.failed {
+            color: #e94560;
+        }
+
+        .suite-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .suite-card {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+        }
+
+        .suite-card.failed {
+            border-left-color: #e94560;
+        }
+
+        .suite-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .suite-stats {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .log-line {
+            margin: 2px 0;
+            padding: 2px 5px;
+        }
+
+        .log-success {
+            color: #00ff00;
+        }
+
+        .log-error {
+            color: #e94560;
+        }
+
+        .log-info {
+            color: #4fc3f7;
+        }
+
+        .log-warning {
+            color: #ffeb3b;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #00ff00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .badge-p0 {
+            background: #e94560;
+            color: white;
+        }
+
+        .badge-p1 {
+            background: #ffeb3b;
+            color: black;
+        }
+
+        .badge-p2 {
+            background: #4fc3f7;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 文字修仙游戏 - 测试套件</h1>
+        <p class="subtitle">Comprehensive Test Suite for Xiuxian Game</p>
+
+        <div class="test-controls">
+            <button class="btn" id="runAllTests" onclick="runAllTests()">
+                ▶ 运行所有测试
+            </button>
+            <button class="btn btn-secondary" id="clearOutput" onclick="clearOutput()">
+                🗑 清空输出
+            </button>
+            <button class="btn btn-secondary" id="exportResults" onclick="exportResults()">
+                📥 导出结果
+            </button>
+
+            <div class="progress-container" id="progressContainer" style="display: none;">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+        </div>
+
+        <div class="summary" id="summary" style="display: none;">
+            <h2>📊 测试结果汇总</h2>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-label">总计</div>
+                    <div class="stat-value" id="totalTests">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">通过</div>
+                    <div class="stat-value" id="passedTests">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">失败</div>
+                    <div class="stat-value failed" id="failedTests">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">通过率</div>
+                    <div class="stat-value" id="passRate">0%</div>
+                </div>
+            </div>
+            <div class="suite-results" id="suiteResults"></div>
+        </div>
+
+        <div class="test-output" id="testOutput">
+            <div class="log-info">点击"运行所有测试"开始测试...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 导入所有测试模块
+        import { runConfigurationTests } from './test/test-configuration.js';
+        import { runStateManagementTests } from './test/test-state-management.js';
+        import { runCultivationTests } from './test/test-cultivation.js';
+        import { runQuestTests } from './test/test-quest.js';
+        import { runCombatTests } from './test/test-combat.js';
+        import { runSectTests } from './test/test-sect.js';
+        import { runNPCTests } from './test/test-npc.js';
+        import { runPetTests } from './test/test-pet.js';
+        import { runDungeonTests } from './test/test-dungeon.js';
+        import { runAchievementTests } from './test/test-achievement.js';
+        import { runIntegrationTests } from './test/test-integration.js';
+        import { runSaveTests } from './test/test-save.js';
+
+        // 测试套件配置
+        const testSuites = [
+            { name: '配置引用测试', runner: runConfigurationTests, priority: 'P0' },
+            { name: '状态管理测试', runner: runStateManagementTests, priority: 'P0' },
+            { name: '修炼系统测试', runner: runCultivationTests, priority: 'P0' },
+            { name: '任务系统测试', runner: runQuestTests, priority: 'P1' },
+            { name: '战斗系统测试', runner: runCombatTests, priority: 'P1' },
+            { name: '宗门系统测试', runner: runSectTests, priority: 'P1' },
+            { name: 'NPC系统测试', runner: runNPCTests, priority: 'P2' },
+            { name: '宠物系统测试', runner: runPetTests, priority: 'P2' },
+            { name: '副本系统测试', runner: runDungeonTests, priority: 'P1' },
+            { name: '成就系统测试', runner: runAchievementTests, priority: 'P2' },
+            { name: '集成测试', runner: runIntegrationTests, priority: 'P0' },
+            { name: '存档系统测试', runner: runSaveTests, priority: 'P0' }
+        ];
+
+        // 全局结果
+        const overallResults = {
+            suites: [],
+            totalPassed: 0,
+            totalFailed: 0,
+            totalTests: 0,
+            startTime: null
+        };
+
+        // 日志函数
+        function log(message, type = 'info') {
+            const output = document.getElementById('testOutput');
+            const line = document.createElement('div');
+            line.className = `log-line log-${type}`;
+            line.textContent = message;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('testOutput').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+        }
+
+        // 更新进度条
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        // 运行单个测试套件
+        async function runTestSuite(suite, index, total) {
+            log(`\n${'='.repeat(60)}`, 'info');
+            log(`运行测试套件: ${suite.name} [${suite.priority}]`, 'info');
+            log(`${'='.repeat(60)}`, 'info');
+
+            try {
+                // 捕获console输出
+                const originalLog = console.log;
+                const originalError = console.error;
+
+                const logs = [];
+                console.log = (...args) => {
+                    logs.push({ type: 'log', message: args.join(' ') });
+                };
+                console.error = (...args) => {
+                    logs.push({ type: 'error', message: args.join(' ') });
+                };
+
+                const results = await suite.runner();
+
+                // 恢复console
+                console.log = originalLog;
+                console.error = originalError;
+
+                // 输出捕获的日志
+                logs.forEach(logEntry => {
+                    log(logEntry.message, logEntry.type === 'error' ? 'error' : 'success');
+                });
+
+                return {
+                    name: suite.name,
+                    priority: suite.priority,
+                    passed: results.passed,
+                    failed: results.failed,
+                    total: results.passed + results.failed,
+                    tests: results.tests
+                };
+            } catch (error) {
+                log(`测试套件 "${suite.name}" 执行失败: ${error.message}`, 'error');
+                console.error(error);
+                return {
+                    name: suite.name,
+                    priority: suite.priority,
+                    passed: 0,
+                    failed: 1,
+                    total: 1,
+                    tests: [{ name: '测试套件执行', passed: false, details: error.message }],
+                    error: error.message
+                };
+            }
+        }
+
+        // 生成汇总报告
+        function generateSummaryReport() {
+            const summary = document.getElementById('summary');
+            summary.style.display = 'block';
+
+            // 更新统计数据
+            document.getElementById('totalTests').textContent = overallResults.totalTests;
+            document.getElementById('passedTests').textContent = overallResults.totalPassed;
+            document.getElementById('failedTests').textContent = overallResults.totalFailed;
+
+            const passRate = overallResults.totalTests > 0
+                ? ((overallResults.totalPassed / overallResults.totalTests) * 100).toFixed(1)
+                : '0.0';
+            document.getElementById('passRate').textContent = passRate + '%';
+
+            // 生成套件结果卡片
+            const suiteResults = document.getElementById('suiteResults');
+            suiteResults.innerHTML = '';
+
+            for (const suite of overallResults.suites) {
+                const card = document.createElement('div');
+                card.className = 'suite-card' + (suite.failed > 0 ? ' failed' : '');
+
+                const suitePassRate = suite.total > 0
+                    ? ((suite.passed / suite.total) * 100).toFixed(1)
+                    : '0.0';
+
+                card.innerHTML = `
+                    <div class="suite-name">
+                        ${suite.name}
+                        <span class="badge badge-${suite.priority.toLowerCase()}">${suite.priority}</span>
+                    </div>
+                    <div class="suite-stats">
+                        通过: ${suite.passed} | 失败: ${suite.failed} | 总计: ${suite.total} | 通过率: ${suitePassRate}%
+                    </div>
+                `;
+
+                suiteResults.appendChild(card);
+            }
+
+            // 输出汇总
+            log('\n\n', 'info');
+            log('╔══════════════════════════════════════════════════════════╗', 'info');
+            log('║                    测试汇总报告                          ║', 'info');
+            log('╚══════════════════════════════════════════════════════════╝', 'info');
+            log(`\n📊 总体统计:`, 'info');
+            log(`   通过: ${overallResults.totalPassed}`, 'success');
+            log(`   失败: ${overallResults.totalFailed}`, overallResults.totalFailed > 0 ? 'error' : 'info');
+            log(`   总计: ${overallResults.totalTests}`, 'info');
+            log(`   通过率: ${passRate}%`, 'info');
+
+            if (overallResults.totalFailed > 0) {
+                log('\n❌ 失败的测试详情:\n', 'error');
+                for (const suite of overallResults.suites) {
+                    if (suite.failed > 0) {
+                        log(`【${suite.name}】`, 'error');
+                        const failedTests = suite.tests.filter(t => !t.passed);
+                        for (const test of failedTests) {
+                            log(`  ✗ ${test.name}`, 'error');
+                            if (test.details) {
+                                log(`    ${test.details}`, 'error');
+                            }
+                        }
+                        log('', 'error');
+                    }
+                }
+            } else {
+                log('\n🎉 所有测试通过！游戏系统运行正常。\n', 'success');
+            }
+        }
+
+        // 运行所有测试
+        async function runAllTests() {
+            const btn = document.getElementById('runAllTests');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> 测试运行中...';
+
+            clearOutput();
+            overallResults.suites = [];
+            overallResults.totalPassed = 0;
+            overallResults.totalFailed = 0;
+            overallResults.totalTests = 0;
+            overallResults.startTime = Date.now();
+
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('progressBar').style.width = '0%';
+
+            log('╔══════════════════════════════════════════════════════════╗', 'info');
+            log('║          文字修仙游戏 - 全面测试套件                    ║', 'info');
+            log('╚══════════════════════════════════════════════════════════╝\n', 'info');
+            log(`测试套件数量: ${testSuites.length}`, 'info');
+            log(`开始时间: ${new Date(overallResults.startTime).toLocaleString()}\n`, 'info');
+
+            // 运行所有测试套件
+            for (let i = 0; i < testSuites.length; i++) {
+                const result = await runTestSuite(testSuites[i], i, testSuites.length);
+                overallResults.suites.push(result);
+                overallResults.totalPassed += result.passed;
+                overallResults.totalFailed += result.failed;
+                overallResults.totalTests += result.total;
+
+                updateProgress(i + 1, testSuites.length);
+            }
+
+            generateSummaryReport();
+
+            btn.disabled = false;
+            btn.innerHTML = '▶ 运行所有测试';
+        }
+
+        // 导出结果
+        function exportResults() {
+            if (overallResults.totalTests === 0) {
+                log('没有可导出的测试结果', 'warning');
+                return;
+            }
+
+            const report = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total: overallResults.totalTests,
+                    passed: overallResults.totalPassed,
+                    failed: overallResults.totalFailed,
+                    passRate: ((overallResults.totalPassed / overallResults.totalTests) * 100).toFixed(1) + '%'
+                },
+                suites: overallResults.suites
+            };
+
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test-results-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            log('测试结果已导出', 'success');
+        }
+
+        // 暴露给全局
+        window.runAllTests = runAllTests;
+        window.clearOutput = clearOutput;
+        window.exportResults = exportResults;
+    </script>
+</body>
+</html>
