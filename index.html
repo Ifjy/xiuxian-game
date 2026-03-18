@@ -159,6 +159,7 @@
                     <button class="action-btn" id="npcBtn">[NPC]</button>
                     <button class="action-btn" id="artifactBtn">[法宝]</button>
                     <button class="action-btn" id="explorationBtn">[秘境]</button>
+                    <button class="action-btn" id="dungeonBtn">[副本]</button>
                     <button class="action-btn" id="questBtn">[任务]</button>
                     <button class="action-btn" id="saveMenuBtn">[存档]</button>
                     <button class="action-btn" id="MainMenuBtn">[主菜单]</button>
@@ -306,6 +307,29 @@
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <!-- 配置模块 -->
+    <script type="module" src="js/config/GameConfig.js"></script>
+    <script type="module" src="js/config/ItemsConfig.js"></script>
+    <script type="module" src="js/config/MonstersConfig.js"></script>
+    <script type="module" src="js/config/DungeonsConfig.js"></script>
+
+    <!-- 系统模块 -->
+    <script type="module" src="js/systems/CultivationSystem.js"></script>
+    <script type="module" src="js/systems/AdventureSystem.js"></script>
+    <script type="module" src="js/systems/CombatSystem.js"></script>
+    <script type="module" src="js/systems/DungeonSystem.js"></script>
+    <script type="module" src="js/systems/SectSystem.js"></script>
+    <script type="module" src="js/systems/PetSystem.js"></script>
+    <script type="module" src="js/systems/NPCSystem.js"></script>
+    <script type="module" src="js/systems/QuestSystem.js"></script>
+    <script type="module" src="js/systems/AchievementSystem.js"></script>
+
+    <!-- 核心模块 -->
+    <script type="module" src="js/core/SaveManager.js"></script>
+    <script type="module" src="js/core/GameState.js"></script>
+    <script type="module" src="js/core/GameUI.js"></script>
+
+    <!-- 入口文件 -->
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

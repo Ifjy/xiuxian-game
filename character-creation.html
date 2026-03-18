@@ -175,6 +175,226 @@
         </div>
     </div>
 
+    <!-- 配置数据（供 character-creation.js 使用） -->
+    <script>
+        // 从模块化配置中提取灵根配置
+        const CONFIG = {
+            spiritualRoots: {
+                // 天灵根（单元素，最强）
+                '天火灵根': {
+                    tier: '天灵根',
+                    element: '火',
+                    cultivationBonus: 1.5,
+                    skillBonus: 1.3,
+                    alchemyBonus: 1.2,
+                    combatBonus: { fire: 0.3 },
+                    description: '天灵根之最，火焰之力，修炼如神助',
+                    color: '#FF4500',
+                    chance: 0.01
+                },
+                '天水灵根': {
+                    tier: '天灵根',
+                    element: '水',
+                    cultivationBonus: 1.5,
+                    skillBonus: 1.3,
+                    alchemyBonus: 1.4,
+                    combatBonus: { water: 0.3 },
+                    description: '天灵根之最，水之精华，炼丹如神',
+                    color: '#1E90FF',
+                    chance: 0.01
+                },
+                '天木灵根': {
+                    tier: '天灵根',
+                    element: '木',
+                    cultivationBonus: 1.5,
+                    skillBonus: 1.3,
+                    alchemyBonus: 1.3,
+                    combatBonus: { wood: 0.3 },
+                    healingBonus: 0.3,
+                    description: '天灵根之最，生命之源，恢复如神',
+                    color: '#228B22',
+                    chance: 0.01
+                },
+                '天金灵根': {
+                    tier: '天灵根',
+                    element: '金',
+                    cultivationBonus: 1.5,
+                    skillBonus: 1.3,
+                    alchemyBonus: 1.1,
+                    combatBonus: { metal: 0.3 },
+                    attackBonus: 0.2,
+                    description: '天灵根之最，锋芒毕露，战力如神',
+                    color: '#FFD700',
+                    chance: 0.01
+                },
+                '天土灵根': {
+                    tier: '天灵根',
+                    element: '土',
+                    cultivationBonus: 1.5,
+                    skillBonus: 1.3,
+                    alchemyBonus: 1.1,
+                    combatBonus: { earth: 0.3 },
+                    defenseBonus: 0.2,
+                    description: '天灵根之最，厚德载物，防御如神',
+                    color: '#8B4513',
+                    chance: 0.01
+                },
+                // 地灵根（双元素，较强）
+                '水木灵根': {
+                    tier: '地灵根',
+                    elements: ['水', '木'],
+                    cultivationBonus: 1.25,
+                    skillBonus: 1.15,
+                    alchemyBonus: 1.3,
+                    healingBonus: 0.15,
+                    description: '水木相生，修炼与炼丹皆有优势',
+                    color: '#20B2AA',
+                    chance: 0.05
+                },
+                '火土灵根': {
+                    tier: '地灵根',
+                    elements: ['火', '土'],
+                    cultivationBonus: 1.25,
+                    skillBonus: 1.15,
+                    alchemyBonus: 1.1,
+                    combatBonus: { fire: 0.15, earth: 0.15 },
+                    description: '火土相济，战力与防御皆佳',
+                    color: '#CD5C5C',
+                    chance: 0.05
+                },
+                '金木灵根': {
+                    tier: '地灵根',
+                    elements: ['金', '木'],
+                    cultivationBonus: 1.25,
+                    skillBonus: 1.15,
+                    alchemyBonus: 1.2,
+                    attackBonus: 0.1,
+                    healingBonus: 0.1,
+                    description: '金木相克，攻守平衡',
+                    color: '#9ACD32',
+                    chance: 0.05
+                },
+                '金火灵根': {
+                    tier: '地灵根',
+                    elements: ['金', '火'],
+                    cultivationBonus: 1.25,
+                    skillBonus: 1.15,
+                    alchemyBonus: 1.1,
+                    attackBonus: 0.15,
+                    combatBonus: { fire: 0.15, metal: 0.15 },
+                    description: '金火相融，攻击力非凡',
+                    color: '#FF6347',
+                    chance: 0.05
+                },
+                '水土灵根': {
+                    tier: '地灵根',
+                    elements: ['水', '土'],
+                    cultivationBonus: 1.25,
+                    skillBonus: 1.15,
+                    alchemyBonus: 1.2,
+                    defenseBonus: 0.15,
+                    description: '水土相合，防御稳健',
+                    color: '#66CDAA',
+                    chance: 0.05
+                },
+                // 人灵根（三元素，普通）
+                '水木火灵根': {
+                    tier: '人灵根',
+                    elements: ['水', '木', '火'],
+                    cultivationBonus: 1.0,
+                    skillBonus: 1.0,
+                    alchemyBonus: 1.1,
+                    description: '水木火三灵根，修炼速度一般',
+                    color: '#32CD32',
+                    chance: 0.15
+                },
+                '金木水灵根': {
+                    tier: '人灵根',
+                    elements: ['金', '木', '水'],
+                    cultivationBonus: 1.0,
+                    skillBonus: 1.0,
+                    alchemyBonus: 1.15,
+                    healingBonus: 0.1,
+                    description: '金木水三灵根，炼丹尚可',
+                    color: '#8FBC8F',
+                    chance: 0.15
+                },
+                '火土金灵根': {
+                    tier: '人灵根',
+                    elements: ['火', '土', '金'],
+                    cultivationBonus: 1.0,
+                    skillBonus: 1.0,
+                    attackBonus: 0.1,
+                    defenseBonus: 0.1,
+                    description: '火土金三灵根，战力尚可',
+                    color: '#DAA520',
+                    chance: 0.15
+                },
+                '木火土灵根': {
+                    tier: '人灵根',
+                    elements: ['木', '火', '土'],
+                    cultivationBonus: 1.0,
+                    skillBonus: 1.0,
+                    alchemyBonus: 1.05,
+                    healingBonus: 0.05,
+                    description: '木火土三灵根，中规中矩',
+                    color: '#BDB76B',
+                    chance: 0.15
+                },
+                // 杂灵根（四元素，较差）
+                '金木水火灵根': {
+                    tier: '杂灵根',
+                    elements: ['金', '木', '水', '火'],
+                    cultivationBonus: 0.8,
+                    skillBonus: 0.9,
+                    description: '金木水火四灵根，修炼缓慢',
+                    color: '#808080',
+                    chance: 0.2
+                },
+                '木水火土灵根': {
+                    tier: '杂灵根',
+                    elements: ['木', '水', '火', '土'],
+                    cultivationBonus: 0.8,
+                    skillBonus: 0.9,
+                    description: '木水火土四灵根，资质平平',
+                    color: '#696969',
+                    chance: 0.2
+                },
+                // 废灵根（五元素，最差）
+                '五行杂灵根': {
+                    tier: '废灵根',
+                    elements: ['金', '木', '水', '火', '土'],
+                    cultivationBonus: 0.6,
+                    skillBonus: 0.8,
+                    description: '五行杂灵根，修炼艰难，但有机缘',
+                    color: '#A9A9A9',
+                    chance: 0.1
+                },
+                // 特殊灵根
+                '混沌灵根': {
+                    tier: '特殊灵根',
+                    cultivationBonus: 2.0,
+                    skillBonus: 1.5,
+                    alchemyBonus: 1.5,
+                    attackBonus: 0.3,
+                    defenseBonus: 0.3,
+                    healingBonus: 0.3,
+                    description: '传说中的混沌灵根，万法皆通',
+                    color: '#FF00FF',
+                    chance: 0.001
+                },
+                '虚无灵根': {
+                    tier: '特殊灵根',
+                    cultivationBonus: 1.8,
+                    skillBonus: 1.8,
+                    description: '虚无灵根，悟性超群',
+                    color: '#E6E6FA',
+                    chance: 0.001
+                }
+            }
+        };
+    </script>
+
     <script src="character-creation.js"></script>
 </body>
 </html>
