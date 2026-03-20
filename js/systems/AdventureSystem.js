@@ -59,6 +59,11 @@ export class AdventureSystem {
         } catch (error) {
             console.error('任务进度更新失败:', error);
         }
+
+        // 确保UI更新
+        if (this.state.ui) {
+            this.state.ui.updateDisplay();
+        }
     }
 
     // 开始秘境探索
@@ -178,15 +183,29 @@ export class AdventureSystem {
             this.state.isWorking = false;
             this.state.workEndTime = 0;
             this.state.currentJob = null;
+            this.state.workType = null;
         }, job.duration);
 
         return { success: true, message: `开始${job.name}` };
     }
 
-    // 完成打工
+    // 完成打工或炼丹
     completeWork() {
-        // 这个方法在 startWork 中通过 setTimeout 处理
-        // 这里提供接口以便外部调用
+        // 处理炼丹完成
+        if (this.state.workType === 'alchemy') {
+            this.state.isWorking = false;
+            this.state.workEndTime = 0;
+            this.state.workType = null;
+
+            // 消耗灵石，给予聚气丹
+            this.state.spiritStones -= 50;
+            this.state.addItem('聚气丹', 1);
+            this.state.addLog('炼丹完成！获得聚气丹 x1', 'success');
+
+            return { success: true, message: '炼丹完成' };
+        }
+
+        // 处理普通工作完成
         if (!this.state.currentJob) {
             return { success: false, message: '没有正在执行的工作' };
         }

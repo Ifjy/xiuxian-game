@@ -11,6 +11,8 @@
  * - 法宝管理
  */
 
+import { MONSTERS_CONFIG } from '../config/MonstersConfig.js';
+
 export class CombatSystem {
     constructor(gameState) {
         this.state = gameState;
@@ -161,7 +163,7 @@ export class CombatSystem {
 
     // 战斗怪物
     fightMonster(monsterId, skillId = null) {
-        const monster = this.state.monsters.find(m => m.id === monsterId);
+        const monster = MONSTERS_CONFIG.monsters.find(m => m.id === monsterId);
         if (!monster) {
             return { success: false, message: '怪物不存在' };
         }
@@ -217,7 +219,7 @@ export class CombatSystem {
 
         // 战斗计算
         const playerDamage = Math.max(1, finalAttack - monster.defense) * skillMultiplier;
-        const monsterDamage = Math.max(1, monster.attack - finalDefense);
+        const monsterDamage = Math.max(0, monster.attack - finalDefense); // 允许0伤害，防御高时不受伤害
 
         // 计算回合数
         const playerRounds = Math.ceil(monster.hp / playerDamage);
@@ -242,10 +244,30 @@ export class CombatSystem {
                 droppedItems.push(droppedItem);
             }
 
-            // 检查受伤
-            const cultivationLoss = Math.floor(monsterRounds * monsterDamage * 0.1);
-            if (cultivationLoss > 0) {
-                this.state.cultivation = Math.max(0, this.state.cultivation - cultivationLoss);
+            // 检查受伤 - 根据境界压制调整修为损失
+            let cultivationLoss = 0;
+
+            // 只有当玩家受到伤害时才计算修为损失
+            if (monsterDamage > 0) {
+                cultivationLoss = Math.floor(monsterRounds * monsterDamage * 0.1);
+
+                // 如果玩家有境界压制优势，大幅减少修为损失
+                if (suppression.hasSuppression && suppression.suppressionLevel !== 'suppressed') {
+                    const reductionMultiplier = suppression.suppressionLevel === 'major' ? 0.1 :
+                                                suppression.suppressionLevel === 'moderate' ? 0.3 : 0.5;
+                    cultivationLoss = Math.floor(cultivationLoss * reductionMultiplier);
+                }
+
+                // 如果玩家被境界压制，增加修为损失
+                if (suppression.hasSuppression && suppression.suppressionLevel === 'suppressed') {
+                    cultivationLoss = Math.floor(cultivationLoss * 1.5);
+                }
+
+                cultivationLoss = Math.max(0, cultivationLoss);
+
+                if (cultivationLoss > 0) {
+                    this.state.cultivation = Math.max(0, this.state.cultivation - cultivationLoss);
+                }
             }
 
             // 更新最高伤害记录
@@ -257,11 +279,19 @@ export class CombatSystem {
             }
 
             let message = `战胜了${monster.name}！${skillBonusText}${suppression.hasSuppression ? suppression.description : ''}获得${spiritStones}灵石，${cultivation}修为`;
+
             if (droppedItems.length > 0) {
                 message += `，获得${droppedItems.join('、')}`;
             }
+
             if (cultivationLoss > 0) {
-                message += `，战斗受伤损失${cultivationLoss}修为`;
+                const lossReason = (suppression.hasSuppression && suppression.suppressionLevel !== 'suppressed') ?
+                    '（虽占优势仍略有受伤）' : '战斗受伤';
+                message += `，${lossReason}损失${cultivationLoss}修为`;
+            } else if (monsterDamage === 0) {
+                message += '，凭借绝对防御优势毫发无伤！';
+            } else if (suppression.hasSuppression && suppression.suppressionLevel === 'major') {
+                message += '，凭借境界优势毫发无伤！';
             }
 
             this.state.addLog(message, 'success');

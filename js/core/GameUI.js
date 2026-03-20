@@ -1,4 +1,6 @@
-import { GAME_CONFIG as CONFIG } from '../config/GameConfig.js';
+import { GAME_CONFIG } from '../config/GameConfig.js';
+import { ITEMS_CONFIG } from '../config/ItemsConfig.js';
+import { MONSTERS_CONFIG } from '../config/MonstersConfig.js';
 import { ASCII_ART } from '../config/ASCIIArt.js';
 import { SaveManager } from './SaveManager.js';
 
@@ -10,6 +12,69 @@ class GameUI {
         this.state = gameState;
         this.updateInterval = null;
         this.saveInterval = null;
+
+        // 初始化情报池
+        this.intelligencePool = this.initIntelligencePool();
+    }
+
+    /**
+     * 初始化情报池
+     */
+    initIntelligencePool() {
+        return {
+            tips: [
+                "提示：打坐可以提升3倍修炼速度，适合挂机时使用",
+                "提示：境界压制在战斗中非常重要，建议先提升境界再挑战强敌",
+                "提示：宗门任务可以获得贡献度，用于购买稀有功法",
+                "提示：突破时使用筑基丹可以大幅提升成功率",
+                "提示：炼丹需要灵根加成，水灵根炼丹效果最好",
+                "提示：宠物可以提供属性加成，记得装备你的宠物",
+                "提示：法宝可以强化，但高级法宝强化失败率较高",
+                "提示：天劫是修仙者的必经之路，建议准备充分再渡劫",
+                "提示：NPC好感度达到一定程度可以解锁特殊交互",
+                "提示：不同灵根有不同加成，天灵根修炼速度最快"
+            ],
+            secrets: [
+                "秘籍：在特定境界购买特定功法可以触发隐藏加成",
+                "秘籍：连续使用聚气丹可以延长时间，最长2小时",
+                "秘籍：宗门商店的折扣随等级提升，最高可享5折",
+                "秘籍：某些功法组合可以产生特殊效果",
+                "秘籍：渡劫失败会损失修为，但不会掉境界",
+                "秘籍：法宝品质从低到高：凡、灵、仙、神、圣",
+                "秘籍：战斗技能有冷却时间，合理安排使用时机",
+                "秘籍：探索秘境可能遇到稀有怪物和宝物"
+            ],
+            mechanics: [
+                "机制说明：修炼速度 = 基础 × 灵根加成 × 功法加成 × 宠物加成 × buff倍率",
+                "机制说明：突破成功率 = 基础率 × (悟性 × 0.01) × 功法加成",
+                "机制说明：境界压制每大境界造成2倍属性差距",
+                "机制说明：宗门贡献度可通过完成任务和捐赠获得",
+                "机制说明：宠物等级影响加成效果，最高10级",
+                "机制说明：法宝强化每级+20%属性，但有失败率"
+            ]
+        };
+    }
+
+    /**
+     * 获取随机情报
+     */
+    getRandomIntelligence() {
+        const randomType = Math.random();
+        let content = '';
+        let category = '';
+
+        if (randomType < 0.5) {
+            category = '提示';
+            content = this.intelligencePool.tips[Math.floor(Math.random() * this.intelligencePool.tips.length)];
+        } else if (randomType < 0.8) {
+            category = '秘籍';
+            content = this.intelligencePool.secrets[Math.floor(Math.random() * this.intelligencePool.secrets.length)];
+        } else {
+            category = '机制';
+            content = this.intelligencePool.mechanics[Math.floor(Math.random() * this.intelligencePool.mechanics.length)];
+        }
+
+        return { category, content };
     }
 
     init() {
@@ -76,14 +141,20 @@ class GameUI {
 
             document.getElementById('meditateBtn').addEventListener('click', () => {
                 const result = this.state.startMeditation();
-                if (result !== false) {
+                if (result === false) {
+                    // 失败时显示错误消息，因为系统内部已经添加了日志
+                    this.updateDisplay();
+                } else {
                     this.updateDisplay();
                 }
             });
 
             document.getElementById('adventureBtn').addEventListener('click', () => {
                 const result = this.state.startAdventure();
-                if (result !== false) {
+                if (result === false) {
+                    // 失败时显示错误消息，因为系统内部已经添加了日志
+                    this.updateDisplay();
+                } else {
                     this.updateDisplay();
                 }
             });
@@ -98,6 +169,11 @@ class GameUI {
 
             document.getElementById('alchemyBtn').addEventListener('click', () => {
                 const result = this.state.alchemy();
+                if (result.success) {
+                    this.state.addLog(result.message, 'success');
+                } else {
+                    this.state.addLog(result.message, 'danger');
+                }
                 this.updateDisplay();
             });
 
@@ -277,16 +353,27 @@ class GameUI {
                     </div>
                 `;
             } else {
+                // 安全访问存档数据，处理旧存档格式
+                const playerName = save.playerName || save.data?.playerName || save.name || '未知';
+                const daoName = save.daoName || save.data?.daoName || '无';
+                const realm = save.realm || save.data?.realm || '炼气期';
+                const level = save.level || save.data?.level || 1;
+                const cultivation = save.cultivation || save.data?.cultivation || 0;
+                const maxCultivation = save.maxCultivation || save.data?.maxCultivation || 100;
+                const spiritStones = save.spiritStones || save.data?.spiritStones || 0;
+                const totalDays = save.totalDays || save.data?.totalDays || 0;
+                const timestamp = save.timestamp || save.data?.timestamp || '未知';
+
                 html += `
                     <div class="slot-content">
                         <div class="player-info">
-                            <div><strong>角色：</strong>${save.data.playerName}</div>
-                            <div><strong>道号：</strong>${save.data.daoName}</div>
-                            <div><strong>境界：</strong>${save.data.realm} ${save.data.level}层</div>
-                            <div><strong>修为：</strong>${this.formatNumber(save.data.cultivation)}/${this.formatNumber(save.data.maxCultivation)}</div>
-                            <div><strong>灵石：</strong>${this.formatNumber(save.data.spiritStones)}</div>
-                            <div><strong>游戏时长：</strong>${save.data.totalDays.toFixed(2)}天</div>
-                            <div><strong>保存时间：</strong>${save.timestamp}</div>
+                            <div><strong>角色：</strong>${playerName}</div>
+                            <div><strong>道号：</strong>${daoName}</div>
+                            <div><strong>境界：</strong>${realm} ${level}层</div>
+                            <div><strong>修为：</strong>${this.formatNumber(cultivation)}/${this.formatNumber(maxCultivation)}</div>
+                            <div><strong>灵石：</strong>${this.formatNumber(spiritStones)}</div>
+                            <div><strong>游戏时长：</strong>${totalDays.toFixed(2)}天</div>
+                            <div><strong>保存时间：</strong>${timestamp}</div>
                         </div>
                         <div class="slot-actions">
                             ${!isCurrent ? `<button class="slot-action-btn" data-action="load" data-slot="${save.slot}">加载存档</button>` : ''}
@@ -344,7 +431,7 @@ class GameUI {
                         break;
                     case 'delete':
                         if (confirm('确定要删除此存档吗？此操作不可恢复！')) {
-                            SaveManager.deleteSave(slot);
+                            SaveManager.delete(slot);
                             this.showSaveModal();
                             this.state.addLog(`已删除槽位 ${slot} 的存档`, 'info');
                         }
@@ -445,10 +532,14 @@ class GameUI {
 
         modalHeader.querySelector('pre').textContent = '┌─── 商 店 ───┐';
 
+        // 调试：检查 ITEMS_CONFIG 的实际内容
+        console.log('ITEMS_CONFIG:', ITEMS_CONFIG);
+        console.log('ITEMS_CONFIG.items:', ITEMS_CONFIG ? ITEMS_CONFIG.items : 'ITEMS_CONFIG is undefined');
+
         // 添加配置检查
-        if (!CONFIG || !CONFIG.items || !Array.isArray(CONFIG.items)) {
-            console.error('物品配置未正确加载');
-            this.showModal('商店', '<div class="error">物品配置未加载，请刷新页面</div>');
+        if (!ITEMS_CONFIG || !ITEMS_CONFIG.items) {
+            console.error('物品配置未正确加载', ITEMS_CONFIG);
+            alert('物品配置未加载，请刷新页面');
             return;
         }
 
@@ -460,17 +551,19 @@ class GameUI {
         html += '<div class="shop-tab-content" id="tabItems">';
         html += '<div class="shop-list">';
 
-        // 遍历物品数组
-        for (const item of CONFIG.items) {
-            if (!item.price) continue;
-            const itemName = item.name;
-            const itemConfig = item;
+        // 遍历物品对象
+        for (const [itemName, itemConfig] of Object.entries(ITEMS_CONFIG.items)) {
+            if (!itemConfig.price) continue;
 
             html += `
                 <div class="shop-item" data-item="${itemName}">
                     <div class="item-name">${itemName}</div>
                     <div class="item-description">${itemConfig.description || ''}</div>
                     <div class="item-price">${itemConfig.price} 灵石</div>
+                    <div class="item-actions">
+                        <button class="buy-one-btn" data-item="${itemName}">购买1个</button>
+                        <button class="buy-ten-btn" data-item="${itemName}">购买10个</button>
+                    </div>
                 </div>
             `;
         }
@@ -480,7 +573,7 @@ class GameUI {
         html += '<div class="shop-tab-content" id="tabSkills" style="display: none;">';
         html += '<div class="shop-list">';
 
-        for (const [skillName, skillConfig] of Object.entries(CONFIG.skills)) {
+        for (const [skillName, skillConfig] of Object.entries(GAME_CONFIG.skills)) {
             if (!skillConfig.learnCost) continue;
 
             html += `
@@ -510,12 +603,12 @@ class GameUI {
             });
         });
 
-        // 购买物品
-        modalBody.querySelectorAll('#tabItems .shop-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const itemName = item.getAttribute('data-item');
-                // 从数组中查找物品配置
-                const itemConfig = CONFIG.items.find(i => i.name === itemName);
+        // 购买物品 - 单个购买
+        modalBody.querySelectorAll('#tabItems .buy-one-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const itemName = btn.getAttribute('data-item');
+                const itemConfig = ITEMS_CONFIG.items[itemName];
 
                 if (!itemConfig) {
                     alert(`物品配置不存在: ${itemName}`);
@@ -524,8 +617,32 @@ class GameUI {
 
                 if (this.state.spiritStones >= itemConfig.price) {
                     this.state.spiritStones -= itemConfig.price;
-                    this.state.addItem(itemName);
+                    this.state.addItem(itemName, 1);
                     this.state.addLog(`购买了${itemName}`, 'success');
+                    this.updateDisplay();
+                } else {
+                    alert('灵石不足');
+                }
+            });
+        });
+
+        // 购买物品 - 批量购买
+        modalBody.querySelectorAll('#tabItems .buy-ten-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const itemName = btn.getAttribute('data-item');
+                const itemConfig = ITEMS_CONFIG.items[itemName];
+
+                if (!itemConfig) {
+                    alert(`物品配置不存在: ${itemName}`);
+                    return;
+                }
+
+                const totalPrice = itemConfig.price * 10;
+                if (this.state.spiritStones >= totalPrice) {
+                    this.state.spiritStones -= totalPrice;
+                    this.state.addItem(itemName, 10);
+                    this.state.addLog(`购买了${itemName} x10`, 'success');
                     this.updateDisplay();
                 } else {
                     alert('灵石不足');
@@ -537,7 +654,7 @@ class GameUI {
         modalBody.querySelectorAll('#tabSkills .shop-item').forEach(item => {
             item.addEventListener('click', () => {
                 const skillName = item.getAttribute('data-skill');
-                const skillConfig = CONFIG.skills[skillName];
+                const skillConfig = GAME_CONFIG.skills[skillName];
                 if (this.state.spiritStones >= skillConfig.learnCost) {
                     if (this.state.skills[skillName]) {
                         alert('已经学过此功法');
@@ -546,7 +663,7 @@ class GameUI {
 
                     // 检查前置要求
                     if (skillConfig.requirements) {
-                        const realmNames = Object.keys(CONFIG.realms);
+                        const realmNames = Object.keys(GAME_CONFIG.realms);
                         const currentRealmIndex = realmNames.indexOf(this.state.realm);
                         const requiredRealmIndex = realmNames.indexOf(skillConfig.requirements.realm);
 
@@ -585,14 +702,14 @@ class GameUI {
         // 添加数据检查
         if (!this.state.inventory) {
             console.error('背包数据不存在');
-            this.showModal('背包', '<div class="error">背包数据不存在</div>');
+            alert('背包数据不存在');
             return;
         }
 
         // 添加配置检查
-        if (!CONFIG || !CONFIG.items || !Array.isArray(CONFIG.items)) {
-            console.error('物品配置未正确加载');
-            this.showModal('背包', '<div class="error">物品配置未加载，请刷新页面</div>');
+        if (!ITEMS_CONFIG || !ITEMS_CONFIG.items) {
+            console.error('物品配置未正确加载', ITEMS_CONFIG);
+            alert('物品配置未加载，请刷新页面');
             return;
         }
 
@@ -604,11 +721,13 @@ class GameUI {
             let html = '<div class="inventory-list">';
 
             for (const [itemName, count] of items) {
-                // 从数组中查找物品配置
-                const itemConfig = CONFIG.items.find(item => item.name === itemName);
+                // 从对象中获取物品配置
+                const itemConfig = ITEMS_CONFIG.items[itemName];
 
                 if (!itemConfig) {
                     console.warn(`物品配置不存在: ${itemName}`);
+                    console.warn('可用的物品:', Object.keys(ITEMS_CONFIG.items));
+                    console.warn('当前背包:', this.state.inventory);
                     continue;
                 }
 
@@ -617,7 +736,10 @@ class GameUI {
                         <div class="item-name">${itemName} × ${count}</div>
                         <div class="item-description">${itemConfig.description || ''}</div>
                         <div class="item-actions">
-                            ${itemConfig.consume ? '<button class="use-btn">使用</button>' : ''}
+                            ${itemConfig.consume ? `
+                                <button class="use-one-btn" data-item="${itemName}">使用1个</button>
+                                ${count > 1 ? `<button class="use-all-btn" data-item="${itemName}" data-count="${count}">使用全部(${count})</button>` : ''}
+                            ` : ''}
                             <button class="sell-btn">出售</button>
                         </div>
                     </div>
@@ -627,11 +749,11 @@ class GameUI {
             html += '</div>';
             modalBody.innerHTML = html;
 
-            // 使用物品
-            modalBody.querySelectorAll('.use-btn').forEach(btn => {
+            // 使用物品 - 单个使用
+            modalBody.querySelectorAll('.use-one-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const itemDiv = e.target.closest('.inventory-item');
-                    const itemName = itemDiv.getAttribute('data-item');
+                    e.stopPropagation();
+                    const itemName = btn.getAttribute('data-item');
                     const result = this.state.useItem(itemName);
                     if (result.success) {
                         this.state.addLog(result.message, 'success');
@@ -643,13 +765,40 @@ class GameUI {
                 });
             });
 
+            // 使用物品 - 全部使用
+            modalBody.querySelectorAll('.use-all-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const itemName = btn.getAttribute('data-item');
+                    const count = parseInt(btn.getAttribute('data-count'));
+
+                    if (confirm(`确定要使用全部${count}个${itemName}吗？`)) {
+                        let successCount = 0;
+                        for (let i = 0; i < count; i++) {
+                            const result = this.state.useItem(itemName);
+                            if (result.success) {
+                                successCount++;
+                            } else {
+                                alert(result.message);
+                                break;
+                            }
+                        }
+                        if (successCount > 0) {
+                            this.state.addLog(`使用了${itemName} x${successCount}`, 'success');
+                            this.updateDisplay();
+                            this.showInventory();
+                        }
+                    }
+                });
+            });
+
             // 出售物品
             modalBody.querySelectorAll('.sell-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const itemDiv = e.target.closest('.inventory-item');
                     const itemName = itemDiv.getAttribute('data-item');
-                    // 从数组中查找物品配置
-                    const itemConfig = CONFIG.items.find(item => item.name === itemName);
+                    // 从对象中获取物品配置
+                    const itemConfig = ITEMS_CONFIG.items[itemName];
 
                     if (!itemConfig) {
                         alert(`物品配置不存在: ${itemName}`);
@@ -686,7 +835,7 @@ class GameUI {
             let html = '<div class="artifact-list">';
 
             for (const artifactName of this.state.artifacts) {
-                const artifactConfig = CONFIG.artifacts[artifactName];
+                const artifactConfig = GAME_CONFIG.artifacts[artifactName];
                 const stats = this.state.calculateArtifactStats(artifactName);
                 const isEquipped = Object.values(this.state.equippedArtifacts).includes(artifactName);
 
@@ -752,13 +901,15 @@ class GameUI {
 
         let html = '<div class="realms-list">';
 
-        for (const [realmId, realm] of Object.entries(CONFIG.secretRealms)) {
+        for (const realm of GAME_CONFIG.secretRealms) {
+            const realmId = realm.id; // 使用realm的id属性，而不是数组索引
+
             // 检查解锁条件
             let locked = false;
             let lockedReason = '';
 
             if (realm.requirements) {
-                const realmNames = Object.keys(CONFIG.realms);
+                const realmNames = Object.keys(GAME_CONFIG.realms);
                 const currentRealmIndex = realmNames.indexOf(this.state.realm);
                 const requiredRealmIndex = realmNames.indexOf(realm.requirements.realm);
 
@@ -796,12 +947,22 @@ class GameUI {
             btn.addEventListener('click', () => {
                 const action = btn.getAttribute('data-action');
                 const realmId = btn.getAttribute('data-realm');
-                const realm = CONFIG.secretRealms[realmId];
+                const realm = GAME_CONFIG.secretRealms.find(r => r.id === realmId);
+
+                if (!realm) {
+                    console.error('未找到秘境:', realmId);
+                    return;
+                }
 
                 switch (action) {
                     case 'explore':
-                        this.state.addLog(`正在探索${realm.name}...`, 'warning');
-                        this.performRealmExploration(realm);
+                        // 关闭模态框并开始探索（设置isExploring状态）
+                        modal.classList.remove('active');
+                        const exploreResult = this.state.startExploration(realmId);
+                        if (exploreResult) {
+                            this.state.addLog(`正在探索${realm.name}...`, 'warning');
+                        }
+                        this.updateDisplay();
                         break;
                     case 'gather':
                         this.performRealmGathering(realm);
@@ -879,10 +1040,10 @@ class GameUI {
     performRealmChallenge(realm) {
         // 根据秘境难度生成敌人
         const difficulty = realm.difficulty;
-        const monsters = CONFIG.monsters.filter(m => {
+        const monsters = MONSTERS_CONFIG.monsters.filter(m => {
             if (!m.requirements) return false;
-            const reqRealmIndex = Object.keys(CONFIG.realms).indexOf(m.requirements.realm);
-            const playerRealmIndex = Object.keys(CONFIG.realms).indexOf(this.state.realm);
+            const reqRealmIndex = Object.keys(GAME_CONFIG.realms).indexOf(m.requirements.realm);
+            const playerRealmIndex = Object.keys(GAME_CONFIG.realms).indexOf(this.state.realm);
             return Math.abs(m.level - this.state.level) <= difficulty * 3 && playerRealmIndex >= reqRealmIndex;
         });
 
@@ -1046,6 +1207,24 @@ class GameUI {
         return titles[type] || '📢 提示';
     }
 
+    /**
+     * 检查宗门加入要求
+     * @param {Object} sect - 宗门配置对象
+     * @returns {Object} - {can: boolean, reason: string}
+     */
+    checkSectRequirements(sect) {
+        if (sect.requirements.realm) {
+            const realmNames = Object.keys(GAME_CONFIG.realms);
+            const currentRealmIndex = realmNames.indexOf(this.state.realm);
+            const requiredRealmIndex = realmNames.indexOf(sect.requirements.realm);
+
+            if (currentRealmIndex < requiredRealmIndex) {
+                return { can: false, reason: `需要${sect.requirements.realm}境界` };
+            }
+        }
+        return { can: true, reason: '' };
+    }
+
     showSectModal() {
         const modal = document.getElementById('gameModal');
         const modalBody = document.getElementById('modalBody');
@@ -1057,16 +1236,26 @@ class GameUI {
 
             let html = '<div class="sect-list">';
 
-            for (const sect of CONFIG.sects) {
+            for (const sect of GAME_CONFIG.sects) {
                 if (sect.id === 'none') continue;
+
+                const canJoin = this.checkSectRequirements(sect);
+                const joinButtonHtml = canJoin.can ?
+                    `<button class="btn-join-sect" data-sect-id="${sect.id}">加入宗门</button>` :
+                    `<span class="sect-cannot-join">${canJoin.reason}</span>`;
 
                 html += `
                     <div class="sect-item" data-sect-id="${sect.id}">
-                        <div class="sect-name">${sect.name}</div>
-                        <div class="sect-description">${sect.description}</div>
-                        <div class="sect-requirements">
-                            要求: ${sect.requirements.realm || '无'} ${sect.requirements.level || ''} |
-                            加入费用: ${sect.joinCost}灵石
+                        <div class="sect-info">
+                            <div class="sect-name">${sect.name}</div>
+                            <div class="sect-description">${sect.description}</div>
+                            <div class="sect-requirements">
+                                要求: ${sect.requirements.realm || '无'} ${sect.requirements.level || ''} |
+                                加入费用: ${sect.joinCost}灵石
+                            </div>
+                        </div>
+                        <div class="sect-action">
+                            ${joinButtonHtml}
                         </div>
                     </div>
                 `;
@@ -1075,22 +1264,26 @@ class GameUI {
             html += '</div>';
             modalBody.innerHTML = html;
 
-            // 添加点击事件
-            modalBody.querySelectorAll('.sect-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const sectId = item.getAttribute('data-sect-id');
+            // 添加加入按钮事件
+            modalBody.querySelectorAll('.btn-join-sect').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const sectId = btn.getAttribute('data-sect-id');
                     const result = this.state.joinSect(sectId);
+
                     if (result.success) {
-                        modal.classList.remove('active');
+                        this.state.addLog(result.message, 'success');
                         this.updateDisplay();
+                        modal.classList.remove('active');
+                        this.showSectModal();
                     } else {
-                        alert(result.message);
+                        this.state.addLog(result.message, 'danger');
                     }
                 });
             });
         } else {
             // 显示当前宗门功能界面
-            const sect = CONFIG.sects.find(s => s.id === this.state.sect);
+            const sect = GAME_CONFIG.sects.find(s => s.id === this.state.sect);
 
             modalHeader.querySelector('pre').textContent = `┌─── ${sect.name} ───┐`;
 
@@ -1154,7 +1347,7 @@ class GameUI {
                     this.updateDisplay();
                     this.showSectModal();
                 } else {
-                    alert('灵石不足');
+                    this.state.addLog('灵石不足', 'danger');
                 }
             });
 
@@ -1177,7 +1370,7 @@ class GameUI {
             });
 
             document.getElementById('leaveSectBtn').addEventListener('click', () => {
-                const currentSect = CONFIG.sects.find(s => s.id === this.state.sect);
+                const currentSect = GAME_CONFIG.sects.find(s => s.id === this.state.sect);
                 const currentRank = this.state.sectRank;
                 const contribution = this.state.sectContribution;
                 const reputation = this.state.sectReputation;
@@ -1210,7 +1403,7 @@ class GameUI {
             const tasksList = modalBody.querySelector('.sect-tasks-list');
             const rankBonus = this.state.getSectRankBonus();
 
-            for (const task of CONFIG.sectTasks) {
+            for (const task of GAME_CONFIG.sectTasks) {
                 // 检查任务要求和权限
                 let canDo = true;
                 let requirementText = '';
@@ -1218,7 +1411,7 @@ class GameUI {
 
                 // 检查基础要求
                 if (task.requirements.minRealm) {
-                    const realmNames = Object.keys(CONFIG.realms);
+                    const realmNames = Object.keys(GAME_CONFIG.realms);
                     const currentRealmIndex = realmNames.indexOf(this.state.realm);
                     const requiredRealmIndex = realmNames.indexOf(task.requirements.minRealm);
                     if (currentRealmIndex < requiredRealmIndex) {
@@ -1276,7 +1469,7 @@ class GameUI {
                         if (result.success) {
                             modal.classList.remove('active');
                         } else {
-                            alert(result.message);
+                            this.state.addLog(result.message, 'danger');
                         }
                     });
                 } else {
@@ -1299,10 +1492,10 @@ class GameUI {
             const shopItems = modalBody.querySelector('#shopItems');
 
             // 功法
-            for (const skill of CONFIG.sectShop.skills) {
+            for (const skill of GAME_CONFIG.sectShop.skills) {
                 let canBuy = true;
                 if (skill.requirements.minRealm) {
-                    const realmNames = Object.keys(CONFIG.realms);
+                    const realmNames = Object.keys(GAME_CONFIG.realms);
                     const currentRealmIndex = realmNames.indexOf(this.state.realm);
                     const requiredRealmIndex = realmNames.indexOf(skill.requirements.minRealm);
                     if (currentRealmIndex < requiredRealmIndex) {
@@ -1329,7 +1522,7 @@ class GameUI {
                             this.updateDisplay();
                             modal.classList.remove('active');
                         } else {
-                            alert(result.message);
+                            this.state.addLog(result.message, 'danger');
                         }
                     });
                 }
@@ -1338,10 +1531,10 @@ class GameUI {
             }
 
             // 物品
-            for (const item of CONFIG.sectShop.items) {
+            for (const item of GAME_CONFIG.sectShop.items) {
                 let canBuy = true;
                 if (item.requirements.minRealm) {
-                    const realmNames = Object.keys(CONFIG.realms);
+                    const realmNames = Object.keys(GAME_CONFIG.realms);
                     const currentRealmIndex = realmNames.indexOf(this.state.realm);
                     const requiredRealmIndex = realmNames.indexOf(item.requirements.minRealm);
                     if (currentRealmIndex < requiredRealmIndex) {
@@ -1364,7 +1557,7 @@ class GameUI {
                             this.updateDisplay();
                             modal.classList.remove('active');
                         } else {
-                            alert(result.message);
+                            this.state.addLog(result.message, 'danger');
                         }
                     });
                 }
@@ -1394,8 +1587,12 @@ class GameUI {
                             tabInfo.style.display = 'block';
                         } else if (tabName === 'tasks' && tabTasks) {
                             tabTasks.style.display = 'block';
+                            // 刷新任务列表
+                            this._refreshSectTasks(modalBody);
                         } else if (tabName === 'shop' && tabShop) {
                             tabShop.style.display = 'block';
+                            // 刷新商店列表
+                            this._refreshSectShop(modalBody);
                         }
                     });
                 });
@@ -1405,13 +1602,177 @@ class GameUI {
         modal.classList.add('active');
     }
 
+    // 刷新宗门任务列表
+    _refreshSectTasks(modalBody) {
+        const tasksList = modalBody.querySelector('.sect-tasks-list');
+        if (!tasksList) return;
+
+        // 清空现有内容
+        tasksList.innerHTML = '';
+
+        // 重新渲染任务列表（复制自showSectModal）
+        for (const task of GAME_CONFIG.sectTasks) {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'sect-task';
+
+            let canAccept = true;
+            let lockedReason = null;
+
+            if (task.requirements) {
+                if (task.requirements.minRealm) {
+                    const realmNames = Object.keys(GAME_CONFIG.realms);
+                    const currentRealmIndex = realmNames.indexOf(this.state.realm);
+                    const requiredRealmIndex = realmNames.indexOf(task.requirements.minRealm);
+                    if (currentRealmIndex < requiredRealmIndex) {
+                        canAccept = false;
+                        lockedReason = `需要${task.requirements.minRealm}境界`;
+                    }
+                }
+                if (task.requirements.sect && this.state.sect !== task.requirements.sect) {
+                    canAccept = false;
+                    lockedReason = '需要加入对应宗门';
+                }
+            }
+
+            const requirementText = task.requirements?.minRealm || task.requirements?.sect || '';
+
+            if (canAccept) {
+                // 安全获取奖励信息
+                const contributionText = task.contributionReward ?
+                    `${task.contributionReward[0]}-${task.contributionReward[1]}` : '0';
+                const spiritStonesText = task.spiritStonesReward ?
+                    `${task.spiritStonesReward[0]}-${task.spiritStonesReward[1]}` : '0';
+
+                taskDiv.innerHTML = `
+                    <div class="task-name">${task.name}</div>
+                    <div class="task-description">${task.description}</div>
+                    <div class="task-rewards">奖励: ${contributionText} 贡献, ${spiritStonesText} 灵石</div>
+                    <div class="task-requirements">${requirementText}</div>
+                `;
+
+                taskDiv.addEventListener('click', () => {
+                    const result = this.state.acceptSectTask(task.name);
+                    if (result.success) {
+                        this.state.addLog(result.message, 'success');
+                        this._refreshSectTasks(modalBody);
+                    } else {
+                        this.state.addLog(result.message, 'danger');
+                    }
+                });
+            } else {
+                const reason = lockedReason || requirementText || '条件不足';
+                taskDiv.style.opacity = '0.6';
+                taskDiv.style.cursor = 'not-allowed';
+                taskDiv.innerHTML = `
+                    <div class="task-name">${task.name} 🔒</div>
+                    <div class="task-description">${task.description}</div>
+                    <div class="task-bonus" style="color: var(--danger-color)">${reason}</div>
+                `;
+            }
+
+            tasksList.appendChild(taskDiv);
+        }
+    }
+
+    // 刷新宗门商店列表
+    _refreshSectShop(modalBody) {
+        const shopSkills = modalBody.querySelector('#shopSkills');
+        const shopItems = modalBody.querySelector('#shopItems');
+        if (!shopSkills || !shopItems) return;
+
+        // 清空现有内容
+        shopSkills.innerHTML = '';
+        shopItems.innerHTML = '';
+
+        // 重新渲染商店（复制自showSectModal）
+        // 功法
+        for (const skill of GAME_CONFIG.sectShop.skills) {
+            let canBuy = true;
+            if (skill.requirements.minRealm) {
+                const realmNames = Object.keys(GAME_CONFIG.realms);
+                const currentRealmIndex = realmNames.indexOf(this.state.realm);
+                const requiredRealmIndex = realmNames.indexOf(skill.requirements.minRealm);
+                if (currentRealmIndex < requiredRealmIndex) {
+                    canBuy = false;
+                }
+            }
+
+            if (skill.requirements.sect && this.state.sect !== skill.requirements.sect) {
+                canBuy = false;
+            }
+
+            const skillDiv = document.createElement('div');
+            skillDiv.className = 'shop-item';
+            skillDiv.innerHTML = `
+                <div class="shop-item-name">${skill.name}</div>
+                <div class="shop-item-price">${skill.price} ${skill.currency === 'spiritStones' ? '灵石' : '贡献'}</div>
+            `;
+
+            if (canBuy) {
+                skillDiv.addEventListener('click', () => {
+                    const result = this.state.buyFromSectShop('skills', skill.name);
+                    if (result.success) {
+                        this.state.addLog(result.message, 'success');
+                        this.updateDisplay();
+                        document.getElementById('gameModal').classList.remove('active');
+                    } else {
+                        this.state.addLog(result.message, 'danger');
+                    }
+                });
+            } else {
+                skillDiv.style.opacity = '0.6';
+                skillDiv.style.cursor = 'not-allowed';
+            }
+
+            shopSkills.appendChild(skillDiv);
+        }
+
+        // 物品
+        for (const item of GAME_CONFIG.sectShop.items) {
+            let canBuy = true;
+            if (item.requirements.minRealm) {
+                const realmNames = Object.keys(GAME_CONFIG.realms);
+                const currentRealmIndex = realmNames.indexOf(this.state.realm);
+                const requiredRealmIndex = realmNames.indexOf(item.requirements.minRealm);
+                if (currentRealmIndex < requiredRealmIndex) {
+                    canBuy = false;
+                }
+            }
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'shop-item';
+            itemDiv.innerHTML = `
+                <div class="shop-item-name">${item.name}</div>
+                <div class="shop-item-price">${item.price} ${item.currency === 'spiritStones' ? '灵石' : '贡献'}</div>
+            `;
+
+            if (canBuy) {
+                itemDiv.addEventListener('click', () => {
+                    const result = this.state.buyFromSectShop('items', item.name);
+                    if (result.success) {
+                        this.state.addLog(result.message, 'success');
+                        this.updateDisplay();
+                        document.getElementById('gameModal').classList.remove('active');
+                    } else {
+                        this.state.addLog(result.message, 'danger');
+                    }
+                });
+            } else {
+                itemDiv.style.opacity = '0.6';
+                itemDiv.style.cursor = 'not-allowed';
+            }
+
+            shopItems.appendChild(itemDiv);
+        }
+    }
+
     // 显示渡劫界面
     showTribulationModal(targetRealm) {
         const modal = document.getElementById('gameModal');
         const modalBody = document.getElementById('modalBody');
         const modalHeader = document.getElementById('modalHeader');
 
-        const tribulation = CONFIG.heavenlyTribulations[targetRealm];
+        const tribulation = GAME_CONFIG.heavenlyTribulations[targetRealm];
         if (!tribulation) {
             alert('此境界无需渡劫');
             return;
@@ -1551,7 +1912,7 @@ class GameUI {
         const modalBody = document.getElementById('modalBody');
         const modalHeader = document.getElementById('modalHeader');
 
-        const npc = CONFIG.npcs[npcId];
+        const npc = GAME_CONFIG.npcs[npcId];
         if (!npc) {
             alert('NPC不存在');
             return;
@@ -1692,7 +2053,7 @@ class GameUI {
 
     // 处理NPC操作
     handleNPCAction(npcId, actionType, optionData = null) {
-        const npc = CONFIG.npcs[npcId];
+        const npc = GAME_CONFIG.npcs[npcId];
         if (!npc) return;
 
         switch (actionType) {
@@ -1703,8 +2064,18 @@ class GameUI {
                 // 购买情报逻辑
                 if (this.state.spiritStones >= 100) {
                     this.state.spiritStones -= 100;
-                    this.state.addLog('花费100灵石购买了情报', 'info');
-                    // 可以显示一些游戏提示或秘籍
+
+                    // 获取随机情报
+                    const intelligence = this.getRandomIntelligence();
+
+                    // 显示情报内容
+                    this.state.addLog(`花费100灵石购买了情报：${intelligence.category}`, 'info');
+
+                    // 使用醒目的方式显示
+                    alert(`【${intelligence.category}】\n\n${intelligence.content}`);
+
+                    // 也在日志中记录
+                    this.state.addLog(intelligence.content, 'rare');
                 } else {
                     alert('灵石不足');
                 }
@@ -1741,7 +2112,7 @@ class GameUI {
 
     // 显示赠送礼物界面
     showNPCCiftModal(npcId) {
-        const npc = CONFIG.npcs[npcId];
+        const npc = GAME_CONFIG.npcs[npcId];
         if (!npc) return;
 
         const modal = document.getElementById('gameModal');
@@ -1821,7 +2192,7 @@ class GameUI {
     // 获取当前可用的任务列表
     getAvailableQuests() {
         const available = [];
-        for (const [questId, quest] of Object.entries(CONFIG.storyQuests)) {
+        for (const [questId, quest] of Object.entries(GAME_CONFIG.storyQuests)) {
             if (this.completedQuests.includes(questId)) continue;
             if (quest.requirements && !this.checkQuestRequirements(quest.requirements)) continue;
             const currentStage = this.getCurrentQuestStage(questId);
@@ -1834,7 +2205,7 @@ class GameUI {
     // 检查任务前置条件
     checkQuestRequirements(requirements) {
         if (requirements.realm) {
-            const realmNames = Object.keys(CONFIG.realms);
+            const realmNames = Object.keys(GAME_CONFIG.realms);
             const currentRealmIndex = realmNames.indexOf(this.realm);
             const requiredRealmIndex = realmNames.indexOf(requirements.realm);
             if (currentRealmIndex < requiredRealmIndex) return false;
@@ -1848,7 +2219,7 @@ class GameUI {
 
     // 检查是否可以开始任务
     canStartQuest(questId) {
-        const quest = CONFIG.storyQuests[questId];
+        const quest = GAME_CONFIG.storyQuests[questId];
         if (!quest) return false;
         if (quest.type === 'main') return quest.chapter <= this.currentChapter;
         return this.checkQuestRequirements(quest.requirements);
@@ -1858,7 +2229,7 @@ class GameUI {
     getCurrentQuestStage(questId) {
         if (this.questProgress[questId]) {
             const stageId = this.questProgress[questId].currentStage;
-            const quest = CONFIG.storyQuests[questId];
+            const quest = GAME_CONFIG.storyQuests[questId];
             return quest ? quest.stages.find(s => s.id === stageId) : null;
         }
         return null;
@@ -1866,7 +2237,7 @@ class GameUI {
 
     // 开始任务
     startQuest(questId) {
-        const quest = CONFIG.storyQuests[questId];
+        const quest = GAME_CONFIG.storyQuests[questId];
         if (!quest) return { success: false, message: '任务不存在' };
         if (this.completedQuests.includes(questId)) return { success: false, message: '任务已完成' };
         if (this.questProgress[questId]) return { success: false, message: '任务已进行中' };
@@ -1885,7 +2256,7 @@ class GameUI {
     updateQuestProgress(objectiveType, value) {
         const updatedQuests = [];
         for (const [questId, progress] of Object.entries(this.questProgress)) {
-            const quest = CONFIG.storyQuests[questId];
+            const quest = GAME_CONFIG.storyQuests[questId];
             if (!quest) continue;
             const currentStage = quest.stages.find(s => s.id === progress.currentStage);
             if (!currentStage) continue;
@@ -1986,7 +2357,7 @@ class GameUI {
 
     // 完成任务阶段
     completeQuestStage(questId, stage) {
-        const quest = CONFIG.storyQuests[questId];
+        const quest = GAME_CONFIG.storyQuests[questId];
         const onComplete = stage.onComplete;
 
         // 发放奖励
@@ -2050,14 +2421,14 @@ class GameUI {
         if (!this.questProgress[questId]) return;
         delete this.questProgress[questId];
         this.completedQuests.push(questId);
-        const quest = CONFIG.storyQuests[questId];
+        const quest = GAME_CONFIG.storyQuests[questId];
         this.addLog(`任务完成：${quest.name}`, 'legendary');
     }
 
     // 获取任务进度描述
     getQuestProgressText(questId) {
         const progress = this.questProgress[questId];
-        const quest = CONFIG.storyQuests[questId];
+        const quest = GAME_CONFIG.storyQuests[questId];
         if (!progress || !quest) return '未开始';
 
         const currentStage = quest.stages.find(s => s.id === progress.currentStage);
@@ -2146,13 +2517,13 @@ class GameUI {
                 <div class="monster-title">可选怪物</div>
         `;
 
-        for (const monster of CONFIG.monsters) {
+        for (const monster of MONSTERS_CONFIG.monsters) {
             // 检查是否可以挑战
             let canChallenge = true;
             let requirementText = '';
 
             if (monster.requirements.realm) {
-                const realmNames = Object.keys(CONFIG.realms);
+                const realmNames = Object.keys(GAME_CONFIG.realms);
                 const currentRealmIndex = realmNames.indexOf(this.state.realm);
                 const requiredRealmIndex = realmNames.indexOf(monster.requirements.realm);
 
@@ -2201,7 +2572,11 @@ class GameUI {
             item.addEventListener('click', () => {
                 const monsterId = item.getAttribute('data-monster');
                 const result = this.state.fightMonster(monsterId, this.state.activeCombatSkill);
+
+                // 先添加日志
                 this.state.addLog(result.message, result.success ? (result.victory ? 'success' : 'info') : 'danger');
+
+                // 立即更新UI显示（关键修复）
                 this.updateDisplay();
 
                 if (!result.success && !result.victory) {
@@ -2276,10 +2651,28 @@ class GameUI {
                             <div class="rewards-list">
                 `;
 
-                if (currentStage) {
+                // 显示当前阶段奖励
+                if (currentStage && currentStage.rewards && currentStage.rewards.length > 0) {
+                    html += `<div class="reward-section"><span class="reward-label">阶段奖励：</span>`;
                     currentStage.rewards.forEach(reward => {
                         html += `<span class="reward-item">${this.formatQuestReward(reward)}</span>`;
                     });
+                    html += `</div>`;
+                }
+
+                // 显示任务完成奖励
+                if (quest.onComplete && quest.onComplete.rewards && quest.onComplete.rewards.length > 0) {
+                    html += `<div class="reward-section"><span class="reward-label">完成奖励：</span>`;
+                    quest.onComplete.rewards.forEach(reward => {
+                        html += `<span class="reward-item">${this.formatQuestReward(reward)}</span>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // 如果没有奖励配置
+                if ((!currentStage || !currentStage.rewards || currentStage.rewards.length === 0) &&
+                    (!quest.onComplete || !quest.onComplete.rewards || quest.onComplete.rewards.length === 0)) {
+                    html += `<span class="reward-item">暂无奖励</span>`;
                 }
 
                 html += `
@@ -2317,20 +2710,24 @@ class GameUI {
     // 格式化奖励文本
     formatQuestReward(reward) {
         switch (reward.type) {
-            case 'spirit_stones': return `${reward.value}灵石`;
+            case 'spirit_stones':
+            case 'spiritStones': return `${reward.value}灵石`;
             case 'cultivation': return `${reward.value}修为`;
-            case 'item': return `${reward.value}×${reward.quantity || 1}`;
+            case 'item': return `${reward.value}×${reward.quantity || reward.amount || 1}`;
             case 'skill': return `功法：${reward.value}`;
             case 'artifact': return `法宝：${reward.value}`;
-            case 'sect_contribution': return `${reward.value}贡献`;
-            case 'sect_reputation': return `${reward.value}声望`;
+            case 'sect_contribution':
+            case 'sectContribution': return `${reward.value}贡献`;
+            case 'sect_reputation':
+            case 'sectReputation': return `${reward.value}声望`;
+            case 'info': return `情报：${reward.value}`;
             default: return '未知奖励';
         }
     }
 
     // 显示任务详情
     showQuestDetailModal(questId) {
-        const quest = CONFIG.storyQuests[questId];
+        const quest = GAME_CONFIG.storyQuests[questId];
         if (!quest) return;
 
         const modal = document.getElementById('gameModal');
@@ -2399,7 +2796,7 @@ class GameUI {
 
         let html = '<div class="job-list">';
 
-        for (const job of CONFIG.jobs) {
+        for (const job of GAME_CONFIG.jobs) {
             const attributeValue = this.state.talents[job.attribute] || 0;
             const bonus = Math.floor(attributeValue * job.bonusMultiplier * 100);
 
@@ -2448,7 +2845,7 @@ class GameUI {
         modalHeader.querySelector('pre').textContent = '┌─── 副本列表 ───┐';
 
         // 检查是否有副本配置
-        if (!CONFIG.dungeons || Object.keys(CONFIG.dungeons).length === 0) {
+        if (!GAME_CONFIG.dungeons || Object.keys(GAME_CONFIG.dungeons).length === 0) {
             modalBody.innerHTML = `
                 <div class="dungeon-list-empty">
                     <div class="empty-title">暂无可用副本</div>
@@ -2461,13 +2858,13 @@ class GameUI {
 
         let html = '<div class="dungeon-list-container">';
 
-        for (const [dungeonId, dungeon] of Object.entries(CONFIG.dungeons)) {
+        for (const [dungeonId, dungeon] of Object.entries(GAME_CONFIG.dungeons)) {
             // 检查解锁条件
             let locked = false;
             let lockedReason = '';
 
             if (dungeon.requirements) {
-                const realmNames = Object.keys(CONFIG.realms);
+                const realmNames = Object.keys(GAME_CONFIG.realms);
                 const currentRealmIndex = realmNames.indexOf(this.state.realm);
                 const requiredRealmIndex = realmNames.indexOf(dungeon.requirements.realm);
 
@@ -2538,7 +2935,7 @@ class GameUI {
      * @param {string} dungeonId - 副本ID
      */
     showDungeonDetail(dungeonId) {
-        const dungeon = CONFIG.dungeons[dungeonId];
+        const dungeon = GAME_CONFIG.dungeons[dungeonId];
         if (!dungeon) {
             alert('副本不存在');
             return;
@@ -2613,7 +3010,7 @@ class GameUI {
      * @param {string} dungeonId - 副本ID
      */
     showDungeonBattle(dungeonId) {
-        const dungeon = CONFIG.dungeons[dungeonId];
+        const dungeon = GAME_CONFIG.dungeons[dungeonId];
         if (!dungeon) {
             alert('副本不存在');
             return;
@@ -2647,7 +3044,7 @@ class GameUI {
                     <div class="current-monsters">
                         <h4>当前敌人</h4>
                         ${currentStage.monsters?.map(monster => {
-                            const monsterConfig = typeof monster === 'string' ? CONFIG.monsters.find(m => m.id === monster) : monster;
+                            const monsterConfig = typeof monster === 'string' ? MONSTERS_CONFIG.monsters.find(m => m.id === monster) : monster;
                             return monsterConfig ? `
                                 <div class="monster-battle-card">
                                     <div class="monster-name">${monsterConfig.name}</div>
@@ -2733,7 +3130,7 @@ class GameUI {
      * @param {string} dungeonId - 副本ID
      */
     executeDungeonBattle(dungeonId) {
-        const dungeon = CONFIG.dungeons[dungeonId];
+        const dungeon = GAME_CONFIG.dungeons[dungeonId];
         if (!dungeon) {
             alert('副本不存在');
             return;
@@ -2764,7 +3161,7 @@ class GameUI {
         if (currentStage.monsters && currentStage.monsters.length > 0) {
             for (const monsterData of currentStage.monsters) {
                 const monsterConfig = typeof monsterData === 'string'
-                    ? CONFIG.monsters.find(m => m.id === monsterData)
+                    ? MONSTERS_CONFIG.monsters.find(m => m.id === monsterData)
                     : monsterData;
 
                 if (!monsterConfig) continue;
@@ -2816,7 +3213,7 @@ class GameUI {
      * @param {boolean} auto - 是否自动战斗
      */
     startDungeonBattle(dungeonId, auto = false) {
-        const dungeon = CONFIG.dungeons[dungeonId];
+        const dungeon = GAME_CONFIG.dungeons[dungeonId];
         if (!dungeon) {
             alert('副本不存在');
             return;
@@ -2852,7 +3249,7 @@ class GameUI {
      * @param {string} dungeonId - 副本ID
      */
     autoDungeonBattle(dungeonId) {
-        const dungeon = CONFIG.dungeons[dungeonId];
+        const dungeon = GAME_CONFIG.dungeons[dungeonId];
         if (!dungeon) return;
 
         const playerStats = this.state.calculateCombatStats();
@@ -2904,7 +3301,7 @@ class GameUI {
      * @param {string} dungeonId - 副本ID
      */
     completeDungeon(dungeonId) {
-        const dungeon = CONFIG.dungeons[dungeonId];
+        const dungeon = GAME_CONFIG.dungeons[dungeonId];
         if (!dungeon) return;
 
         // 发放奖励
@@ -2970,6 +3367,11 @@ class GameUI {
                 // 检查秘境探索是否完成
                 if (this.state.isExploring && Date.now() >= this.state.explorationEndTime) {
                     this.state.completeExploration();
+                }
+
+                // 检查打坐是否应该自动结束
+                if (this.state.isMeditating && this.state.meditationEndTime > 0 && Date.now() >= this.state.meditationEndTime) {
+                    this.state.stopMeditation();
                 }
 
                 // 检查buff
@@ -3120,7 +3522,7 @@ class GameUI {
     updateSkillsDisplay() {
         // 更新当前功法
         const currentSkillDiv = document.getElementById('currentSkill');
-        const currentSkill = CONFIG.skills[this.state.currentSkill];
+        const currentSkill = GAME_CONFIG.skills[this.state.currentSkill];
         const currentSkillLevel = this.state.skills[this.state.currentSkill].level;
         const currentBonus = this.calculateSkillBonus(this.state.currentSkill);
 
@@ -3135,7 +3537,7 @@ class GameUI {
         let skillsHtml = '';
 
         for (const [skillName, skillData] of Object.entries(this.state.skills)) {
-            const skill = CONFIG.skills[skillName];
+            const skill = GAME_CONFIG.skills[skillName];
             const isCurrent = skillName === this.state.currentSkill;
             const bonus = this.calculateSkillBonus(skillName);
 
@@ -3168,7 +3570,7 @@ class GameUI {
 
     // 计算功法加成
     calculateSkillBonus(skillName) {
-        const skill = CONFIG.skills[skillName];
+        const skill = GAME_CONFIG.skills[skillName];
         const skillLevel = this.state.skills[skillName].level;
         const bonus = skill.value * skillLevel;
 
@@ -3219,11 +3621,11 @@ class GameUI {
             return;
         }
 
-        const skill = CONFIG.skills[skillName];
+        const skill = GAME_CONFIG.skills[skillName];
 
         // 检查要求
         if (skill.requirements.realm) {
-            const realmNames = Object.keys(CONFIG.realms);
+            const realmNames = Object.keys(GAME_CONFIG.realms);
             const currentRealmIndex = realmNames.indexOf(this.state.realm);
             const requiredRealmIndex = realmNames.indexOf(skill.requirements.realm);
 
@@ -3258,7 +3660,7 @@ class GameUI {
         const currentPetDiv = document.getElementById('currentPet');
 
         if (this.state.currentPet) {
-            const pet = CONFIG.pets[this.state.currentPet];
+            const pet = GAME_CONFIG.pets[this.state.currentPet];
             const petData = this.state.pets[this.state.currentPet];
 
             currentPetDiv.innerHTML = `
@@ -3275,7 +3677,7 @@ class GameUI {
         let petsHtml = '';
 
         for (const [petName, petData] of Object.entries(this.state.pets)) {
-            const pet = CONFIG.pets[petName];
+            const pet = GAME_CONFIG.pets[petName];
             const isCurrent = petName === this.state.currentPet;
 
             petsHtml += `
@@ -3348,11 +3750,11 @@ class GameUI {
             luck: 0        // 幸运加成（百分比）
         };
 
-        const realmConfig = CONFIG.realms[this.state.realm];
+        const realmConfig = GAME_CONFIG.realms[this.state.realm];
 
         // 功法加成
         if (this.state.currentSkill && this.state.skills[this.state.currentSkill]) {
-            const skill = CONFIG.skills[this.state.currentSkill];
+            const skill = GAME_CONFIG.skills[this.state.currentSkill];
             const skillLevel = this.state.skills[this.state.currentSkill].level;
 
             if (skill.effect === 'cultivation_speed') {
@@ -3370,7 +3772,7 @@ class GameUI {
 
         // 宠物加成
         if (this.state.currentPet && this.state.pets[this.state.currentPet]) {
-            const pet = CONFIG.pets[this.state.currentPet];
+            const pet = GAME_CONFIG.pets[this.state.currentPet];
             const petLevel = this.state.pets[this.state.currentPet].level;
 
             if (pet.effect === 'cultivation_boost') {
@@ -3411,7 +3813,7 @@ class GameUI {
 
         for (const achievementId of this.state.achievements) {
             let achievement = null;
-            for (const [realm, realmAchievement] of Object.entries(CONFIG.realmAchievements)) {
+            for (const [realm, realmAchievement] of Object.entries(GAME_CONFIG.realmAchievements)) {
                 if (realmAchievement.id === achievementId) {
                     achievement = realmAchievement;
                     break;
@@ -3436,8 +3838,15 @@ class GameUI {
         const statusText = document.getElementById('currentStatus');
         const statusTimer = document.getElementById('statusTimer');
 
-        // 更新状态文本
-        statusText.textContent = `[${currentState.text}]`;
+        // 更新状态文本 - 包含buff信息
+        let statusDisplay = `[${currentState.text}]`;
+
+        // 添加buff信息到状态显示
+        if (currentState.buffs && currentState.buffs.length > 0) {
+            statusDisplay += ` [${currentState.buffs.join(', ')}]`;
+        }
+
+        statusText.textContent = statusDisplay;
         statusText.className = 'status-text ' + currentState.type;
 
         // 更新计时器
@@ -3446,11 +3855,17 @@ class GameUI {
             statusTimer.textContent = `剩余${remainingTime}秒`;
 
             if (currentState.type === 'meditating') {
-                statusTimer.textContent += ' (3倍修炼速度)';
+                statusTimer.textContent += ' (打坐x3)';
             } else if (currentState.type === 'adventuring' && currentState.adventure) {
                 statusTimer.textContent += ` (${currentState.adventure.name})`;
             } else if (currentState.type === 'working' && currentState.job) {
                 statusTimer.textContent += ` (${currentState.job.name})`;
+            }
+        } else if (currentState.type === 'meditating') {
+            // 打坐状态可能没有endTime，使用meditationEndTime
+            if (this.state.meditationEndTime > 0) {
+                const remainingTime = Math.max(0, Math.ceil((this.state.meditationEndTime - Date.now()) / 1000));
+                statusTimer.textContent = `剩余${remainingTime}秒 (打坐x3)`;
             }
         } else {
             statusTimer.textContent = '';

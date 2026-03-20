@@ -11,6 +11,8 @@
  * - 宗门商店购买
  */
 
+import { GAME_CONFIG } from '../config/GameConfig.js';
+
 export class SectSystem {
     constructor(gameState) {
         this.state = gameState;
@@ -254,6 +256,10 @@ export class SectSystem {
         }
 
         const shop = this.state.sectShop;
+        if (!shop || !shop.skills || !shop.items) {
+            return { success: false, message: '宗门商店配置错误' };
+        }
+
         const items = itemType === 'skills' ? shop.skills : shop.items;
 
         const shopItem = items.find(item => item.name === itemName);

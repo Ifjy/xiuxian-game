@@ -78,7 +78,15 @@ export class CultivationSystem {
     // 计算实际修炼速度
     calculateActualCultivationRate() {
         const base = this.calculateBaseCultivationRate();
-        const buffMultiplier = this.state.buffs.cultivation.multiplier;
+
+        // 计算打坐倍率（实时获取）
+        const meditationMultiplier = this.state.isMeditating ? 3.0 : 1.0;
+
+        // 获取物品buff倍率
+        const itemBuffMultiplier = this.state.buffs.cultivation.multiplier || 1.0;
+
+        // 打坐和物品效果是乘法叠加
+        const totalMultiplier = meditationMultiplier * itemBuffMultiplier;
 
         // 随时间有小幅波动
         const timeFactor = 0.8 + Math.random() * 0.4;
@@ -91,7 +99,7 @@ export class CultivationSystem {
 
         const finalFactor = timeFactor + luckFactor;
 
-        return base * buffMultiplier * finalFactor;
+        return base * totalMultiplier * finalFactor;
     }
 
     // 增加修为
@@ -492,10 +500,9 @@ export class CultivationSystem {
             return false;
         }
 
-        // 开始入定
-        this.state.buffs.cultivation.multiplier = 3.0;
-        this.state.buffs.cultivation.endTime = Date.now() + 30000;
+        // 开始入定 - 不修改物品buff，只设置打坐状态
         this.state.isMeditating = true;
+        this.state.meditationEndTime = Date.now() + 30000; // 30秒后自动停止打坐
         this.state.addLog('进入深度入定状态，修炼速度提升3倍，持续30秒', 'success');
         return true;
     }
@@ -505,8 +512,7 @@ export class CultivationSystem {
         if (!this.state.isMeditating) return false;
 
         this.state.isMeditating = false;
-        this.state.buffs.cultivation.multiplier = 1.0;
-        this.state.buffs.cultivation.endTime = 0;
+        // 不再重置buff.multiplier和endTime，让物品buff自然过期
         this.state.addLog('结束入定', 'info');
         return true;
     }

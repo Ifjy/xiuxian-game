@@ -10,7 +10,8 @@ items: {
         value: 2.0,
         duration: 60000,
         rarity: 'common',
-        price: 50
+        price: 50,
+        consume: true  // 可使用
     },
     '筑基丹': {
         description: '大幅提升突破成功率',
@@ -18,7 +19,8 @@ items: {
         value: 0.3,
         duration: 0,
         rarity: 'rare',
-        price: 500
+        price: 500,
+        consume: true  // 可使用
     },
     '灵石袋': {
         description: '包含随机数量的灵石（约80-200个）',
@@ -26,7 +28,8 @@ items: {
         value: [80, 200],
         duration: 0,
         rarity: 'common',
-        price: 100
+        price: 100,
+        consume: true  // 可使用
     },
     '天劫符': {
         description: '渡劫时使用，大幅提升成功率',
@@ -34,7 +37,8 @@ items: {
         value: 0.5,
         duration: 0,
         rarity: 'legendary',
-        price: 5000
+        price: 5000,
+        consume: true  // 可使用
     },
     '洗髓丹': {
         description: '改善根骨，永久增加根骨+1',
@@ -42,7 +46,8 @@ items: {
         value: 1,
         duration: 0,
         rarity: 'rare',
-        price: 1000
+        price: 1000,
+        consume: true  // 可使用
     },
     '悟性丹': {
         description: '开启智慧，永久增加悟性+1',
@@ -50,7 +55,8 @@ items: {
         value: 1,
         duration: 0,
         rarity: 'rare',
-        price: 1000
+        price: 1000,
+        consume: true  // 可使用
     },
     '幸运符': {
         description: '暂时提升幸运',
@@ -58,14 +64,16 @@ items: {
         value: 5,
         duration: 300000,
         rarity: 'common',
-        price: 200
+        price: 200,
+        consume: true  // 可使用
     },
     '灵宠丹': {
         description: '提升宠物等级',
         effect: 'pet_level',
         value: 1,
         rarity: 'rare',
-        price: 1500
+        price: 1500,
+        consume: true  // 可使用
     }
 },
 

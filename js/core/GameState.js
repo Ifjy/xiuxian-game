@@ -8,6 +8,7 @@
  * - 系统模块集成
  */
 import { GAME_CONFIG } from '../config/GameConfig.js';
+import { ITEMS_CONFIG } from '../config/ItemsConfig.js';
 import { MONSTERS_CONFIG } from '../config/MonstersConfig.js';
 import { SaveManager } from './SaveManager.js';
 import { CultivationSystem } from '../systems/CultivationSystem.js';
@@ -57,6 +58,7 @@ export class GameState {
 
         // 状态管理
         this.isMeditating = characterData?.isMeditating || false;
+        this.meditationEndTime = characterData?.meditationEndTime || 0;
         this.isAdventuring = characterData?.isAdventuring || false;
         this.isWorking = characterData?.isWorking || false;
         this.isExploring = characterData?.isExploring || false;
@@ -66,6 +68,7 @@ export class GameState {
         this.currentAdventure = characterData?.currentAdventure || null;
         this.currentJob = characterData?.currentJob || null;
         this.currentExploration = characterData?.currentExploration || null;
+        this.workType = characterData?.workType || null; // 工作类型：'work' 或 'alchemy'
 
         // 副本状态
         this.isInDungeon = characterData?.isInDungeon || false;
@@ -470,6 +473,10 @@ export class GameState {
     }
 
     // AdventureSystem 额外代理方法
+    startExploration(realmId) {
+        return this.adventureSystem.startExploration(realmId);
+    }
+
     completeExploration() {
         return this.adventureSystem.completeExploration();
     }
@@ -484,14 +491,30 @@ export class GameState {
             return { success: false, message: '正在忙碌中' };
         }
 
-        if (!this.inventory['聚气丹'] || this.inventory['聚气丹'] < 1) {
-            return { success: false, message: '材料不足' };
+        // 简化版：消耗灵石炼制聚气丹
+        const cost = 50;
+        if (this.spiritStones < cost) {
+            return { success: false, message: `灵石不足（需要${cost}灵石）` };
         }
 
         this.isWorking = true;
         this.workEndTime = Date.now() + 5000; // 5秒炼丹时间
+        this.workType = 'alchemy';
 
-        return { success: true, message: '开始炼制聚气丹' };
+        // 设置炼丹完成的setTimeout
+        setTimeout(() => {
+            // 重置工作状态
+            this.isWorking = false;
+            this.workEndTime = 0;
+            this.workType = null;
+
+            // 消耗灵石，给予聚气丹
+            this.spiritStones -= cost;
+            this.addItem('聚气丹', 1);
+            this.addLog('炼丹完成！获得聚气丹 x1', 'success');
+        }, 5000);
+
+        return { success: true, message: `开始炼制聚气丹（消耗${cost}灵石）` };
     }
 
     // SectSystem 代理方法
@@ -555,44 +578,9 @@ export class GameState {
     }
 
     buyFromSectShop(category, itemName) {
-        // 宗门商店购买
-        if (this.sect === 'none') {
-            return { success: false, message: '未加入宗门' };
-        }
-
-        const rankBonus = this.getSectRankBonus();
-        const discount = rankBonus.shopDiscount;
-
-        // 查找商品
-        let item = null;
-        if (category === 'skills') {
-            item = this.skills[itemName];
-        } else if (category === 'items') {
-            item = { name: itemName, price: 100 }; // 简化处理
-        }
-
-        if (!item) {
-            return { success: false, message: '商品不存在' };
-        }
-
-        const price = Math.floor(item.price * (1 - discount));
-        if (this.spiritStones < price) {
-            return { success: false, message: `灵石不足，需要${price}灵石` };
-        }
-
-        this.spiritStones -= price;
-
-        if (category === 'skills') {
-            const result = this.learnSkill(itemName);
-            if (result.success) {
-                return { success: true, message: `购买并学会了${itemName}` };
-            }
-            return result;
-        } else {
-            this.addItem(itemName);
-            return { success: true, message: `购买了${itemName}` };
-        }
+        return this.sectSystem.buyFromSectShop(category, itemName);
     }
+
 
     // NPCSystem 额外代理方法
     getNPCAffection(npcId) {
@@ -663,14 +651,114 @@ export class GameState {
             return { success: false, message: '物品不存在或数量不足' };
         }
 
-        // 简单的物品使用逻辑
-        if (itemName === '聚气丹') {
-            this.inventory[itemName]--;
-            this.addCultivation(50);
-            return { success: true, message: '使用了聚气丹，获得50修为' };
+        // 获取物品配置
+        const itemConfig = ITEMS_CONFIG.items[itemName];
+        if (!itemConfig) {
+            return { success: false, message: '物品配置不存在' };
         }
 
-        return { success: false, message: '该物品无法使用' };
+        // 消耗物品
+        this.inventory[itemName]--;
+
+        // 根据物品效果执行
+        switch (itemConfig.effect) {
+            case 'cultivation_boost':
+                // 修炼加速效果 - 与打坐叠加
+                const now = Date.now();
+                const duration = itemConfig.duration || 60000;
+                const itemMultiplier = itemConfig.value || 2.0;
+
+                // 设置修炼buff - 只存储物品倍率，不包含打坐倍率
+                const currentEndTime = this.buffs.cultivation.endTime;
+                const newEndTime = now + duration;
+
+                // 如果当前buff还在有效期内，累加时间
+                if (currentEndTime > now) {
+                    const remainingTime = currentEndTime - now;
+                    // 累加新的持续时间，但设置上限（最多2小时）
+                    const maxDuration = 2 * 60 * 60 * 1000; // 2小时
+                    const totalDuration = Math.min(remainingTime + duration, maxDuration);
+                    this.buffs.cultivation.endTime = now + totalDuration;
+                } else {
+                    // 当前buff已过期，重新开始
+                    this.buffs.cultivation.endTime = newEndTime;
+                }
+
+                // 物品倍率取最大值（避免低倍率覆盖高倍率）
+                this.buffs.cultivation.multiplier = Math.max(this.buffs.cultivation.multiplier || 1.0, itemMultiplier);
+
+                // 更新提示消息 - 显示实际倍率（包含打坐）
+                const actualMultiplier = itemMultiplier * (this.isMeditating ? 3.0 : 1.0);
+                const remainingTimeText = currentEndTime > now ?
+                    `（剩余${Math.floor((currentEndTime - now) / 1000)}秒，已延长至${Math.floor((this.buffs.cultivation.endTime - now) / 60000)}分钟）` : '';
+                const meditationText = this.isMeditating ? '（打坐状态x3）' : '';
+                this.addLog(`使用了${itemName}，修炼速度x${actualMultiplier}${meditationText}${remainingTimeText}`, 'success');
+                return { success: true, message: `使用了${itemName}，修炼速度x${actualMultiplier}${meditationText}${remainingTimeText}` };
+
+            case 'breakthrough_boost':
+                // 突破加成 - 临时存储在buff中
+                if (!this.buffs.breakthrough) {
+                    this.buffs.breakthrough = { bonus: 0, endTime: 0 };
+                }
+                this.buffs.breakthrough.bonus = (this.buffs.breakthrough.bonus || 0) + (itemConfig.value || 0.3);
+                this.buffs.breakthrough.endTime = Date.now() + 86400000; // 24小时
+                this.addLog(`使用了${itemName}，突破成功率+${Math.round(itemConfig.value * 100)}%`, 'success');
+                return { success: true, message: `使用了${itemName}，突破成功率+${Math.round(itemConfig.value * 100)}%` };
+
+            case 'spirit_stones':
+                // 灵石袋
+                const range = itemConfig.value || [80, 200];
+                const amount = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+                this.spiritStones += amount;
+                this.addLog(`打开了${itemName}，获得${amount}灵石`, 'success');
+                return { success: true, message: `打开了${itemName}，获得${amount}灵石` };
+
+            case 'tribulation_boost':
+                // 天劫符 - 增加渡劫成功率
+                if (!this.buffs.tribulation) {
+                    this.buffs.tribulation = { bonus: 0, endTime: 0 };
+                }
+                this.buffs.tribulation.bonus = (this.buffs.tribulation.bonus || 0) + (itemConfig.value || 0.5);
+                this.addLog(`使用了${itemName}，渡劫成功率+${Math.round(itemConfig.value * 100)}%`, 'legendary');
+                return { success: true, message: `使用了${itemName}，渡劫成功率+${Math.round(itemConfig.value * 100)}%` };
+
+            case 'potential_boost':
+                // 洗髓丹 - 永久增加根骨
+                this.talents.potential = (this.talents.potential || 0) + (itemConfig.value || 1);
+                this.addLog(`使用了${itemName}，根骨+${itemConfig.value}，当前根骨：${this.talents.potential}`, 'rare');
+                return { success: true, message: `使用了${itemName}，根骨+${itemConfig.value}` };
+
+            case 'wisdom_boost':
+                // 悟性丹 - 永久增加悟性
+                this.talents.wisdom = (this.talents.wisdom || 0) + (itemConfig.value || 1);
+                this.addLog(`使用了${itemName}，悟性+${itemConfig.value}，当前悟性：${this.talents.wisdom}`, 'rare');
+                return { success: true, message: `使用了${itemName}，悟性+${itemConfig.value}` };
+
+            case 'luck_boost':
+                // 幸运符 - 临时增加幸运
+                if (!this.buffs.luck) {
+                    this.buffs.luck = { bonus: 0, endTime: 0 };
+                }
+                this.buffs.luck.bonus = (this.buffs.luck.bonus || 0) + (itemConfig.value || 5);
+                this.buffs.luck.endTime = Date.now() + (itemConfig.duration || 300000);
+                this.addLog(`使用了${itemName}，幸运+${itemConfig.value}`, 'success');
+                return { success: true, message: `使用了${itemName}，幸运+${itemConfig.value}` };
+
+            case 'pet_level':
+                // 灵宠丹 - 提升宠物等级
+                if (this.currentPet) {
+                    this.pets[this.currentPet].level = (this.pets[this.currentPet].level || 1) + (itemConfig.value || 1);
+                    this.addLog(`使用了${itemName}，宠物${this.currentPet}等级+${itemConfig.value}`, 'rare');
+                    return { success: true, message: `使用了${itemName}，宠物等级+${itemConfig.value}` };
+                } else {
+                    this.inventory[itemName]++; // 退回物品
+                    return { success: false, message: '没有当前宠物，无法使用' };
+                }
+
+            default:
+                this.inventory[itemName]++; // 退回物品
+                return { success: false, message: '该物品无法使用' };
+        }
     }
 
     // Buff系统
@@ -717,10 +805,15 @@ export class GameState {
 
         // 检查打工状态
         if (this.isWorking && this.workEndTime > 0 && now >= this.workEndTime) {
-            this.addLog('检测到工作超时，强制结束', 'warning');
+            if (this.workType === 'alchemy') {
+                this.addLog('炼丹完成！', 'success');
+            } else {
+                this.addLog('检测到工作超时，强制结束', 'warning');
+            }
             this.isWorking = false;
             this.workEndTime = 0;
             this.currentJob = null;
+            this.workType = null;
         }
 
         // 检查探索状态
@@ -748,17 +841,45 @@ export class GameState {
             endTime = this.adventureEndTime;
             adventure = this.currentAdventure;
         } else if (this.isWorking && this.workEndTime > 0) {
-            text = '打工中';
-            type = 'working';
+            if (this.workType === 'alchemy') {
+                text = '炼丹中';
+                type = 'alchemy';
+            } else {
+                text = '打工中';
+                type = 'working';
+            }
             endTime = this.workEndTime;
             job = this.currentJob;
         } else if (this.isExploring && this.explorationEndTime > 0) {
-            text = '探索中';
+            // 根据探索内容显示不同状态
+            if (this.currentExploration && this.currentExploration.name) {
+                text = this.currentExploration.name;
+            } else {
+                text = '探索秘境中';
+            }
             type = 'exploring';
             endTime = this.explorationEndTime;
         } else if (this.isInDungeon) {
             text = '副本中';
             type = 'dungeon';
+        }
+
+        // 添加buff信息到状态
+        const buffs = [];
+        const now = Date.now();
+
+        // 检查修炼buff
+        if (this.buffs.cultivation.endTime > now) {
+            const remainingMinutes = Math.floor((this.buffs.cultivation.endTime - now) / 60000);
+            const multiplier = this.buffs.cultivation.multiplier;
+            buffs.push(`聚气x${multiplier.toFixed(1)} (${remainingMinutes}分)`);
+        }
+
+        // 检查突破buff
+        if (this.buffs.breakthrough.endTime > now) {
+            const remainingHours = Math.floor((this.buffs.breakthrough.endTime - now) / 3600000);
+            const bonus = this.buffs.breakthrough.bonus;
+            buffs.push(`突破+${Math.round(bonus * 100)}% (${remainingHours}时)`);
         }
 
         return {
@@ -767,6 +888,7 @@ export class GameState {
             endTime,
             adventure,
             job,
+            buffs,
             realm: this.realm,
             level: this.level,
             cultivation: this.cultivation,
@@ -802,6 +924,7 @@ export class GameState {
             cultivationRate: this.cultivationRate,
             totalDays: this.totalDays,
             isMeditating: this.isMeditating,
+            meditationEndTime: this.meditationEndTime,
             isAdventuring: this.isAdventuring,
             isWorking: this.isWorking,
             isExploring: this.isExploring,

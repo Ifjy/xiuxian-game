@@ -13,6 +13,7 @@
  */
 
 import { DUNGEONS_CONFIG } from '../config/DungeonsConfig.js';
+import { MONSTERS_CONFIG } from '../config/MonstersConfig.js';
 
 export class DungeonSystem {
     constructor(gameState) {
@@ -145,7 +146,7 @@ export class DungeonSystem {
         }
 
         const monsterId = dungeon.monsters[monsterIndex];
-        const monster = this.state.monsters.find(m => m.id === monsterId);
+        const monster = MONSTERS_CONFIG.monsters.find(m => m.id === monsterId);
         if (!monster) {
             return { success: false, message: '怪物数据不存在' };
         }
